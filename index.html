@@ -3,82 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Noub Royale Merger</title>
+    <title>Noub Merger V13.0 PRO</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- البار المقدس العلوي -->
+    <!-- الشريط العلوي الملكي -->
     <div class="holy-bar">
-        <div class="icon-btn diamond-btn" onclick="UI.toggleModal('diamond-scr', true)">💎<div class="badge" id="d-badge">0/13</div></div>
+        <div class="icon-btn diamond-circle" onclick="UI.toggleModal('diamond-scr', true)">💎</div>
         <div class="icon-btn" onclick="UI.toggleModal('store-scr', true)">🏪</div>
-        <div class="icon-btn" id="vault-btn" onclick="UI.toggleModal('vault-scr', true)">🏦 <div class="badge" id="v-badge">0</div></div>
-        <div class="icon-btn" onclick="tg.showAlert('لوحة الصدارة قريباً')">🏆 <div class="badge" id="lvl-badge">1</div></div>
+        <div id="v-btn" class="icon-btn" onclick="UI.toggleModal('vault-scr', true)">🏦 <div class="badge" id="v-badge">0</div></div>
+        <div class="icon-btn" onclick="tg.showAlert('قائمة المتصدرين قريباً')">🏆 <div class="badge" id="lvl-badge">1</div></div>
     </div>
     
-    <div class="rank-display">الرتبة: <b id="rank-name">NOBLE</b><div id="lvl-fill"></div></div>
+    <!-- معلومات الرتبة والتقدم -->
+    <div class="rank-label">الرتبة: <b id="rank-name">NOBLE</b> | <span id="d-count-ui">0/13</span>
+        <div id="lvl-fill"></div>
+        <div id="tip-box" class="tip-msg">استخدم القنبلة لترقية الشبكة!</div>
+    </div>
 
     <!-- منطقة اللعب -->
     <div class="game-zone">
-        <div id="blast-layer" class="blast-effect"></div>
+        <div id="blast-layer"></div>
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- بار التحكم -->
+    <!-- أدوات التحكم -->
     <div class="control-bar">
-        <div class="btn-util" id="trash-bin" onclick="Game.trash()">🗑️</div>
-        <div class="btn-util" onclick="Game.fastCharge()" style="color:yellow">⚡<div class="badge" id="fc-badge">10</div></div>
-        <div class="btn-util active-glow" id="bomb-btn" onclick="Game.useBomb()">💣<div class="badge" id="b-badge">2</div></div>
-        <div class="btn-util active-glow" id="j-inv" onclick="Game.useJoker()">🃏<div class="badge" id="j-badge">3</div></div>
+        <div class="btn-util" onclick="Engine.trash()">🗑️</div>
+        <div class="btn-util" onclick="Engine.fastCharge()" style="color:yellow">⚡<div class="badge" id="fc-badge">10</div></div>
+        <div class="btn-util" id="bomb-btn" onclick="Engine.useBomb()">💣<div class="badge" id="b-badge">2</div></div>
+        <div class="btn-util joker-inv-icon" id="j-inv" onclick="Engine.useJoker()">🃏<div class="badge" id="j-badge">3</div></div>
         <div class="btn-util" id="auto-btn" onclick="UI.toggleAuto()">🪄</div>
     </div>
 
-    <div class="energy-meta">
+    <!-- عداد الطاقة -->
+    <div class="energy-section">
         <span id="timer-txt">شحن: --:--</span> | <span id="energy-val">60/60 ⚡</span>
         <div class="energy-bar"><div id="energy-fill"></div></div>
     </div>
 
-    <div class="footer">
-        <button class="btn-spawn" onclick="Game.spawn()">إنشاء كارت (⚡1)</button>
-    </div>
+    <!-- زر الإنشاء الرئيسي -->
+    <div class="footer"><button id="spawn-btn" class="btn-spawn" onclick="Engine.spawn()">إنشاء كارت (⚡1)</button></div>
 
-    <!-- المودالات -->
+    <!-- الشاشات المنبثقة (Modals) -->
     <div id="vault-scr" class="overlay">
         <h2>الخزنة الملكية</h2>
         <div class="v-grid" id="v-grid"></div>
-        <button id="return-btn" class="btn-spawn" style="display:none; background:var(--gold); color:#000; margin:15px" onclick="Game.returnFromVault()">إرجاع للشبكة</button>
-        <button class="btn-spawn" style="width:120px; background:#444" onclick="UI.toggleModal('vault-scr', false)">إغلاق</button>
+        <button id="return-btn" class="btn-spawn btn-return" onclick="Engine.returnFromVault()">إرجاع للشبكة</button>
+        <button class="btn-spawn btn-close" onclick="UI.toggleModal('vault-scr', false)">إغلاق</button>
     </div>
 
     <div id="diamond-scr" class="overlay">
         <h2>الماسة الملكية</h2>
         <div class="diamond-svg-container"><svg viewBox="0 0 100 100" id="diamond-svg"></svg></div>
-        <div class="ledger"><b>سجل الآص:</b><div id="ledger-items"></div></div>
-        <button class="btn-spawn" style="width:120px" onclick="UI.toggleModal('diamond-scr', false)">العودة</button>
+        <button class="btn-spawn btn-close" onclick="UI.toggleModal('diamond-scr', false)">العودة</button>
     </div>
 
     <div id="store-scr" class="overlay">
         <h2>المتجر الملكي</h2>
         <div class="store-card">
-            <p>الذهب: <b id="gold-txt">600</b> 💰</p>
-            <button class="buy-btn" onclick="Game.buy('bomb', 200)">قنبلة (200💰)</button>
-            <button class="buy-btn" onclick="Game.buy('energy', 500)">طاقة كاملة (500💰)</button>
+            <p>الذهب الداخلي: <b id="gold-txt">600</b> 💰</p>
+            <button class="btn-spawn store-btn" onclick="Engine.buy('bomb', 200)">شراء قنبلة (200💰)</button>
+            <button class="btn-spawn store-btn" onclick="Engine.buy('energy', 500)">شحن طاقة (500💰)</button>
         </div>
-        <button class="btn-spawn" style="background:#333" onclick="UI.toggleModal('store-scr', false)">إغلاق</button>
+        <button class="btn-spawn btn-close" onclick="UI.toggleModal('store-scr', false)">إغلاق</button>
     </div>
 
-    <div id="ace-modal" class="overlay" style="justify-content:center">
-        <h1 style="color:var(--diamond)">🎉 آص ملكي جديد! 👑</h1>
+    <div id="ace-modal" class="overlay centered">
+        <h1 class="celebrate-txt">🎉 اكتشاف ملكي! 💎</h1>
         <p id="ace-msg"></p>
-        <div style="display:flex; gap:10px; width:100%">
-            <button class="btn-spawn" style="background:#444; flex:1" onclick="Game.aceChoice('sell')">بيع (200💰)</button>
-            <button class="btn-spawn" style="flex:1" onclick="Game.aceChoice('keep')">احتفاظ</button>
+        <div class="choice-row">
+            <button class="btn-spawn btn-choice-alt" onclick="Engine.aceChoice('sell')">بيع (200💰)</button>
+            <button class="btn-spawn btn-choice" onclick="Engine.aceChoice('keep')">احتفاظ</button>
         </div>
+    </div>
+
+    <div id="full-modal" class="overlay centered">
+        <h2>الشبكة ممتلئة!</h2>
+        <button class="btn-spawn btn-close" onclick="UI.toggleModal('full-modal', false)">عودة</button>
     </div>
 
     <div id="proxy" class="proxy"></div>
 
-    <!-- تحميل الملفات البرمجية -->
+    <!-- استدعاء الجافا سكريبت بالترتيب الصحيح -->
     <script src="gamebase.js"></script>
     <script src="main.js"></script>
 </body>
