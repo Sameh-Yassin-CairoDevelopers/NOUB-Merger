@@ -2,43 +2,59 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
 body { margin: 0; background: radial-gradient(circle at top, #163e4d, #050c10); font-family: system-ui; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; color: white; }
 
-/* Holy Bar */
-.holy-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-.icon-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative; }
-.diamond-btn { width: 55px; height: 55px; border-radius: 50%; font-size: 32px; border-color: var(--diamond); animation: pulse 8s infinite; }
+/* Upper Bar */
+.holy-bar { padding: calc(env(safe-area-inset-top) + 10px) 15px 5px; display: flex; justify-content: space-between; align-items: center; }
+.icon-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative; cursor: pointer; }
+.diamond-circle { width: 55px; height: 55px; border-radius: 50%; font-size: 32px; border: 2px solid var(--diamond); animation: pulse 8s infinite; }
 @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--diamond); } 50% { transform: scale(1.05); box-shadow: 0 0 20px var(--diamond); } }
 .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; min-width: 16px; height: 16px; border-radius: 8px; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 1px solid #000; }
 
-/* Grid 4x5 - Reduced size by 5% */
-.game-zone { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; margin-top: -15px; }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 250px; height: 100%; max-height: 330px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; }
-.cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.02); border-radius: 6px; position: relative; border: 2px solid transparent; }
-.cell.selected { border-color: var(--gold); background: rgba(255,255,255,0.12); box-shadow: 0 0 15px var(--gold); }
+/* Rank & Level */
+.rank-label { margin: 0 15px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 20px; font-size: 10px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+#lvl-fill { height: 4px; background: var(--gold); border-radius: 2px; width: 0%; transition: 0.3s; margin-top: 4px; }
+.tip-msg { font-size: 9px; color: var(--gold); height: 12px; margin-top: 2px; opacity: 0; transition: 0.5s; }
 
-/* Card */
+/* Grid Zone - Reduced to 240px for safety */
+.game-zone { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; margin-top: -20px; position: relative; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 240px; height: 100%; max-height: 320px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; }
+.cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.02); border-radius: 6px; position: relative; border: 2px solid transparent; transition: 0.2s; }
+.cell.selected { border-color: var(--gold); background: rgba(255,255,255,0.12); transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px var(--gold); }
+
+/* Card Visuals */
 .card { width: 100%; height: 100%; background: white; border-radius: 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.4); pointer-events: none; }
 .card .rank { position: absolute; top: 1px; left: 3px; font-size: 14px; font-weight: 900; color: #1a1a1a; }
 .card .suit { font-size: 30px; }
 
-/* Controls */
+/* Control Bar */
 .control-bar { display: flex; justify-content: space-around; padding: 10px; background: rgba(0,0,0,0.4); gap: 8px; }
 .btn-util { width: 44px; height: 44px; border-radius: 10px; background: #1c2e36; border: 1px solid #444; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
-.btn-util.active-glow { background: #27ae60; border-color: white; box-shadow: 0 0 10px #27ae60; }
+.btn-util.has-stock { background: #27ae60; border-color: white; box-shadow: 0 0 10px #27ae60; }
+.joker-inv-icon { font-size: 26px; }
 
+/* Footer */
+.energy-section { padding: 0 20px; background: #091418; font-size: 10px; color: #aaa; text-align: center; }
+.energy-bar { height: 3px; background: #111; margin-top: 2px; border-radius: 2px; overflow: hidden; }
+#energy-fill { height: 100%; background: #00d2ff; width: 0%; }
 .footer { padding: 5px 20px 20px; background: #091418; }
-.btn-spawn { width: 100%; height: 55px; border-radius: 15px; border: none; background: linear-gradient(45deg, #ff2e63, #ff6b6b); color: white; font-size: 20px; font-weight: bold; box-shadow: 0 5px 0 #9d153a; }
+.btn-spawn { width: 100%; height: 55px; border-radius: 15px; border: none; background: linear-gradient(45deg, #ff2e63, #ff6b6b); color: white; font-size: 20px; font-weight: bold; box-shadow: 0 5px 0 #9d153a; cursor: pointer; }
 
-/* Overlay & Vault */
+/* Modals */
 .overlay { position: fixed; inset: 0; background: rgba(5, 12, 16, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 40px 20px; text-align: center; }
-.v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 220px; }
-.v-cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.05); border: 1px dashed #444; border-radius: 6px; position: relative; }
-.v-cell.selected { border: 2.5px solid var(--diamond); box-shadow: 0 0 15px var(--diamond); }
+.centered { justify-content: center; }
+.v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 200px; margin-top: 15px; }
+.v-cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.05); border: 1px dashed #444; border-radius: 6px; }
+.v-cell.selected { border: 2px solid var(--diamond); box-shadow: 0 0 10px var(--diamond); }
+.btn-return { background: var(--gold) !important; color: #000 !important; margin: 15px; height: 45px; font-size: 14px; }
+.btn-close { width: 120px !important; background: #444 !important; height: 45px; font-size: 14px; }
+.store-btn { height: 45px; font-size: 14px; margin-top: 10px; }
+
+/* Diamond SVG */
+.diamond-svg-container { width: 250px; height: 250px; margin: 15px 0; }
 .tri-p { fill: #1c2e36; stroke: #333; stroke-width: 0.5; transition: 0.5s; }
 .tri-p.active { fill: var(--diamond); filter: drop-shadow(0 0 10px var(--diamond)); stroke: #fff; }
 
-/* Special FX */
-.anim-fly { position: fixed; z-index: 9999; pointer-events: none; animation: fly-slow 3s forwards ease-in-out; }
-@keyframes fly-slow { 0% { transform: scale(1); } 30% { transform: scale(1.2); } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); } }
-.blast-effect { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
-.anim-blast { animation: blast-fx 0.5s ease-out; }
-@keyframes blast-fx { 0% { opacity: 0.8; } 100% { opacity: 0; } }
+/* FX */
+.blast { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
+.anim-blast { animation: blast-fx 0.4s ease-out; }
+@keyframes blast-fx { 0% { opacity: 0.7; } 100% { opacity: 0; } }
+.proxy { position: fixed; pointer-events: none; z-index: 6000; width: 50px; height: 65px; background: white; border-radius: 8px; display: none; align-items: center; justify-content: center; box-shadow: 0 10px 30px #000; transform: scale(1.1); }
