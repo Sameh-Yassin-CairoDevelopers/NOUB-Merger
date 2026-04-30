@@ -3,91 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Noub Merger V13.0 PRO</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Noub Merger V12.0 - The Master Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg: #050c10; --accent: #ff2e63; --gold: #ffd700; --diamond: #00f2fe; --green: #27ae60; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { margin: 0; background: radial-gradient(circle at top, #163e4d, #050c10); font-family: system-ui, sans-serif; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; color: white; }
+
+        /* Top Holy Bar */
+        .holy-bar { padding: calc(env(safe-area-inset-top) + 10px) 15px 5px; display: flex; justify-content: space-between; align-items: center; }
+        .icon-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; position: relative; cursor: pointer; }
+        .diamond-circle { width: 55px; height: 55px; border-radius: 50%; font-size: 32px; border: 2px solid var(--diamond); animation: pulse-slow 8s infinite; }
+        @keyframes pulse-slow { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--diamond); } 50% { transform: scale(1.05); box-shadow: 0 0 20px var(--diamond); } }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; min-width: 16px; height: 16px; border-radius: 8px; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 1px solid #000; padding: 0 3px; }
+        .icon-btn.active-glow { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
+
+        /* Stats */
+        .lvl-pill { margin: 5px 15px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        #lvl-fill { height: 4px; background: var(--gold); border-radius: 2px; width: 0%; transition: 0.3s; margin-top: 4px; }
+
+        /* Grid 4x5 */
+        .game-zone { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; margin-top: -15px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 250px; height: 100%; max-height: 330px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.02); border-radius: 6px; position: relative; border: 2px solid transparent; transition: 0.2s; }
+        .cell.selected { border-color: var(--gold); background: rgba(255,255,255,0.12); transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px var(--gold); }
+
+        /* Cards */
+        .card { width: 100%; height: 100%; background: white; border-radius: 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.4); pointer-events: none; }
+        .card .rank { position: absolute; top: 1px; left: 3px; font-size: 14px; font-weight: 900; color: #1a1a1a; }
+        .card .suit { font-size: 30px; }
+
+        /* Control Bar */
+        .control-bar { display: flex; justify-content: space-around; padding: 10px; background: rgba(0,0,0,0.4); gap: 8px; }
+        .btn-util { width: 44px; height: 44px; border-radius: 10px; background: #1c2e36; border: 1px solid #444; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
+        .btn-util.has-stock { background: var(--green); border-color: white; box-shadow: 0 0 10px var(--green); }
+        .btn-util.active { background: var(--diamond); color: #000; }
+
+        /* Footer */
+        .footer { padding: 5px 15px 20px; background: #091418; display: flex; gap: 8px; }
+        .btn-spawn { flex: 1; height: 55px; border-radius: 15px; border: none; background: linear-gradient(45deg, #ff2e63, #ff6b6b); color: white; font-size: 20px; font-weight: bold; box-shadow: 0 5px 0 #9d153a; }
+        .btn-trash { width: 55px; height: 55px; border-radius: 15px; background: #1c2e36; border: 1px solid #444; color: #aaa; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+
+        /* Modals */
+        .overlay { position: fixed; inset: 0; background: rgba(5, 12, 16, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 40px 20px; text-align: center; }
+        .v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 220px; margin-top: 15px; }
+        .v-cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.05); border: 1px dashed #444; border-radius: 6px; position: relative; }
+        .v-cell.selected { border: 2px solid var(--diamond); box-shadow: 0 0 10px var(--diamond); }
+        .diamond-svg { width: 250px; height: 250px; margin: 15px 0; }
+        .tri-p { fill: #1c2e36; stroke: #333; stroke-width: 0.5; transition: 0.5s; }
+        .tri-p.active { fill: var(--diamond); filter: drop-shadow(0 0 10px var(--diamond)); stroke: #fff; }
+
+        /* Animations */
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .anim-pop { animation: pop 0.3s ease-out; }
+        @keyframes fly-slow { 0% { transform: scale(1); opacity: 1; } 30% { transform: scale(1.2); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; } }
+        .anim-fly { position: fixed; z-index: 9999; pointer-events: none; animation: fly-slow 2.5s forwards ease-in-out; }
+        .blast { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
+        @keyframes blast-anim { 0% { opacity: 0.7; } 100% { opacity: 0; } }
+        .anim-blast { animation: blast-anim 0.5s ease-out; }
+    </style>
 </head>
 <body>
-    <!-- الشريط العلوي الملكي -->
+
+    <!-- TOP SECTION -->
     <div class="holy-bar">
-        <div class="icon-btn diamond-circle" onclick="UI.toggleModal('diamond-scr', true)">💎</div>
-        <div class="icon-btn" onclick="UI.toggleModal('store-scr', true)">🏪</div>
-        <div id="v-btn" class="icon-btn" onclick="UI.toggleModal('vault-scr', true)">🏦 <div class="badge" id="v-badge">0</div></div>
+        <div class="icon-btn diamond-circle" onclick="UI.toggle('diamond-scr', true)">💎</div>
+        <div class="icon-btn" onclick="UI.toggle('store-scr', true)">🏪</div>
+        <div id="v-btn" class="icon-btn" onclick="UI.toggle('vault-scr', true)">🏦 <div class="badge" id="v-badge">0</div></div>
         <div class="icon-btn" onclick="tg.showAlert('قائمة المتصدرين قريباً')">🏆 <div class="badge" id="lvl-badge">1</div></div>
     </div>
     
-    <!-- معلومات الرتبة والتقدم -->
-    <div class="rank-label">الرتبة: <b id="rank-name">NOBLE</b> | <span id="d-count-ui">0/13</span>
-        <div id="lvl-fill"></div>
-        <div id="tip-box" class="tip-msg">استخدم القنبلة لترقية الشبكة!</div>
-    </div>
+    <div class="rank-label">الرتبة: <b id="rank-name">NOBLE</b> | <span id="d-count-ui">0/13</span><div id="lvl-fill"></div></div>
 
-    <!-- منطقة اللعب -->
     <div class="game-zone">
-        <div id="blast-layer"></div>
+        <div id="blast-layer" class="blast"></div>
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- أدوات التحكم -->
+    <!-- CONTROL TOOLS -->
     <div class="control-bar">
-        <div class="btn-util" onclick="Engine.trash()">🗑️</div>
-        <div class="btn-util" onclick="Engine.fastCharge()" style="color:yellow">⚡<div class="badge" id="fc-badge">10</div></div>
+        <div class="btn-util" id="fc-btn" onclick="Engine.fastCharge()" style="color:yellow">⚡<div class="badge" id="fc-badge">10</div></div>
         <div class="btn-util" id="bomb-btn" onclick="Engine.useBomb()">💣<div class="badge" id="b-badge">2</div></div>
-        <div class="btn-util joker-inv-icon" id="j-inv" onclick="Engine.useJoker()">🃏<div class="badge" id="j-badge">3</div></div>
-        <div class="btn-util" id="auto-btn" onclick="UI.toggleAuto()">🪄</div>
+        <div class="btn-util" id="j-inv" onclick="Engine.useJoker()" style="font-size:26px">🃏<div class="badge" id="j-badge">3</div></div>
+        <div class="btn-util" id="auto-btn" onclick="Engine.toggleAuto()">🪄</div>
     </div>
 
-    <!-- عداد الطاقة -->
-    <div class="energy-section">
+    <div style="padding: 0 20px; background: #091418; font-size: 10px; color: #aaa; text-align: center;">
         <span id="timer-txt">شحن: --:--</span> | <span id="energy-val">60/60 ⚡</span>
-        <div class="energy-bar"><div id="energy-fill"></div></div>
+        <div style="height:3px; background:#111; margin-top:2px; border-radius:2px; overflow:hidden;"><div id="energy-fill" style="height:100%; background:#00d2ff; width:0%;"></div></div>
     </div>
 
-    <!-- زر الإنشاء الرئيسي -->
-    <div class="footer"><button id="spawn-btn" class="btn-spawn" onclick="Engine.spawn()">إنشاء كارت (⚡1)</button></div>
-
-    <!-- الشاشات المنبثقة (Modals) -->
-    <div id="vault-scr" class="overlay">
-        <h2>الخزنة الملكية</h2>
-        <div class="v-grid" id="v-grid"></div>
-        <button id="return-btn" class="btn-spawn btn-return" onclick="Engine.returnFromVault()">إرجاع للشبكة</button>
-        <button class="btn-spawn btn-close" onclick="UI.toggleModal('vault-scr', false)">إغلاق</button>
+    <!-- FOOTER -->
+    <div class="footer">
+        <div class="btn-trash" onclick="Engine.trash()">🗑️</div>
+        <button class="btn-spawn" id="spawn-btn" onclick="Engine.spawn()">إنشاء كارت (⚡1)</button>
     </div>
 
+    <!-- MODALS -->
     <div id="diamond-scr" class="overlay">
         <h2>الماسة الملكية</h2>
-        <div class="diamond-svg-container"><svg viewBox="0 0 100 100" id="diamond-svg"></svg></div>
-        <button class="btn-spawn btn-close" onclick="UI.toggleModal('diamond-scr', false)">العودة</button>
+        <div class="diamond-svg"><svg viewBox="0 0 100 100" id="diamond-svg"></svg></div>
+        <button class="btn-spawn" style="width:150px" onclick="UI.toggle('diamond-scr', false)">العودة</button>
     </div>
 
     <div id="store-scr" class="overlay">
-        <h2>المتجر الملكي</h2>
-        <div class="store-card">
-            <p>الذهب الداخلي: <b id="gold-txt">600</b> 💰</p>
-            <button class="btn-spawn store-btn" onclick="Engine.buy('bomb', 200)">شراء قنبلة (200💰)</button>
-            <button class="btn-spawn store-btn" onclick="Engine.buy('energy', 500)">شحن طاقة (500💰)</button>
+        <h2>المتجر</h2>
+        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:20px; width:100%; margin:20px 0;">
+            <p>الذهب: <b id="gold-txt">600</b> 💰</p>
+            <button class="btn-spawn" style="height:45px; font-size:14px; margin-top:10px" onclick="Engine.buy('bomb', 200)">شراء قنبلة (200💰)</button>
+            <button class="btn-spawn" style="height:45px; font-size:14px; margin-top:10px" onclick="Engine.buy('energy', 500)">شحن طاقة (500💰)</button>
         </div>
-        <button class="btn-spawn btn-close" onclick="UI.toggleModal('store-scr', false)">إغلاق</button>
+        <button class="btn-spawn" style="background:#333" onclick="UI.toggle('store-scr', false)">إغلاق</button>
     </div>
 
-    <div id="ace-modal" class="overlay centered">
-        <h1 class="celebrate-txt">🎉 اكتشاف ملكي! 💎</h1>
-        <p id="ace-msg"></p>
-        <div class="choice-row">
-            <button class="btn-spawn btn-choice-alt" onclick="Engine.aceChoice('sell')">بيع (200💰)</button>
-            <button class="btn-spawn btn-choice" onclick="Engine.aceChoice('keep')">احتفاظ</button>
-        </div>
+    <div id="vault-scr" class="overlay">
+        <h2>الخزنة الملكية</h2>
+        <div class="v-grid" id="v-grid"></div>
+        <button id="return-btn" class="btn-spawn" style="display:none; background:var(--gold); color:#000; margin-top:20px" onclick="Engine.returnFromVault()">إرجاع للشبكة</button>
+        <button class="btn-spawn" style="width:150px; background:#444; margin-top:15px" onclick="UI.toggle('vault-scr', false)">إغلاق</button>
     </div>
 
-    <div id="full-modal" class="overlay centered">
-        <h2>الشبكة ممتلئة!</h2>
-        <button class="btn-spawn btn-close" onclick="UI.toggleModal('full-modal', false)">عودة</button>
+    <div id="ace-modal" class="overlay" style="justify-content:center">
+        <h1 style="color:var(--diamond)">اكتشاف ملكي! 💎</h1>
+        <div id="ace-msg" style="margin:20px; font-size:18px"></div>
+        <button class="btn-spawn" onclick="Engine.aceChoice('sell')">بيع (200💰)</button>
+        <button class="btn-spawn" style="margin-top:10px" onclick="Engine.aceChoice('keep')">احتفاظ</button>
     </div>
 
-    <div id="proxy" class="proxy"></div>
+<script>
+    /* =========================================
+       CORE ENGINE LOGIC (Engine)
+       ========================================= */
+    const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+    const TITLES = ['NOBLE','BARON','COUNT','MARQUIS','DUKE','PRINCE','KING','EMPEROR','LORD'];
+    const SUITS = [{id:'S',i:'♠️',c:'#222'},{id:'H',i:'♥️',c:'#d32f2f'},{id:'D',i:'♦️',c:'#d32f2f'},{id:'C',i:'♣️',c:'#222'}];
 
-    <!-- استدعاء الجافا سكريبت بالترتيب الصحيح -->
-    <script src="gamebase.js"></script>
-    <script src="main.js"></script>
+    let state = {
+        gold: 600, energy: 60, merges: 0,
+        board: Array(20).fill(null), vault: Array(12).fill(null),
+        jokers: 3, bombs: 2, fastCharges: 10,
+        diamond: Array(13).fill(false), lastRefill: Date.now(),
+        isAuto: false, selIdx: null, selVaultIdx: null, aceQueue: 0
+    };
+
+    const Engine = {
+        spawn: () => {
+            const e = state.board.findIndex(x=>x===null);
+            if(e===-1) return tg.showAlert("الشبكة ممتلئة!");
+            if(state.energy <= 0) return;
+            const luck = Math.random();
+            if(luck < 0.07) {
+                state.board[e] = { rank: '🃏', suit: {c: '#8e44ad', i: ''} };
+                UI.render(); setTimeout(() => UI.animateJokerFly(e), 1200);
+            } else {
+                let r = RANKS[Math.floor(Math.random()*4)];
+                if(luck < 0.15) r = luck < 0.05 ? 'Q' : (luck < 0.10 ? 'J' : '10');
+                state.board[e] = { rank: r, suit: SUITS[Math.floor(Math.random()*4)], suitId: SUITS[Math.floor(Math.random()*4)].id, isNew: true };
+            }
+            state.energy--; UI.render();
+        },
+        useBomb: () => {
+            if(state.bombs <= 0) return;
+            UI.animateBlast();
+            let nA = 0;
+            state.board = state.board.map(c => {
+                if(!c || c.rank==='A' || c.rank==='🃏') return c;
+                const nxt = RANKS[RANKS.indexOf(c.rank)+1];
+                if(nxt==='A'){ nA++; return null; }
+                return {rank:nxt, suit:c.suit, isNew:true};
+            });
+            state.bombs--; state.aceQueue += nA; 
+            UI.render(); if(state.aceQueue > 0) Engine.handleAce();
+        },
+        useJoker: () => {
+            if(state.jokers <= 0 || state.selIdx === null) return tg.showAlert("اختر كارت أولاً!");
+            const c = state.board[state.selIdx];
+            if(c.rank==='A' || c.rank==='🃏') return;
+            const nxt = RANKS[RANKS.indexOf(c.rank)+1];
+            if(nxt==='A'){ state.board[state.selIdx]=null; state.aceQueue++; Engine.handleAce(); }
+            else state.board[state.selIdx]={rank:nxt, suit:c.suit, isNew:true};
+            state.jokers--; state.selIdx=null; UI.render();
+        },
+        trash: () => { if(state.selIdx !== null){ state.board[state.selIdx]=null; state.selIdx=null; UI.render(); } },
+        toggleAuto: () => { state.isAuto = !state.isAuto; document.getElementById('auto-btn').classList.toggle('active', state.isAuto); if(state.isAuto) Engine.runAuto(); },
+        runAuto: () => {
+            if(!state.isAuto) return;
+            let m = false;
+            for(let i=0; i<20; i++){
+                for(let j=i+1; j<20; j++){
+                    const c1=state.board[i], c2=state.board[j];
+                    if(c1 && c2 && c1.rank===c2.rank && c1.suit.id===c2.suit.id && c1.rank!=='🃏'){
+                        state.selIdx=i; UI.handleClick(j); m=true; break;
+                    }
+                }
+                if(m) break;
+            }
+            if(!m && state.energy > 0 && state.board.includes(null)){ Engine.spawn(); m=true; }
+            if(m) setTimeout(Engine.runAuto, 400);
+            else { state.isAuto=false; document.getElementById('auto-btn').classList.remove('active'); }
+        },
+        handleAce: () => {
+            if(state.aceQueue <= 0) return;
+            state.pendingAce = Math.floor(Math.random()*13);
+            document.getElementById('ace-msg').innerText = `حصلت على القطعة رقم ${state.pendingAce+1}`;
+            UI.toggle('ace-modal', true);
+        },
+        aceChoice: (c) => {
+            if(c==='sell') state.gold += 200;
+            else if(!state.diamond[state.pendingAce]){ state.diamond[state.pendingAce]=true; UI.drawDiamond(); }
+            UI.toggle('ace-modal', false); state.aceQueue--;
+            if(state.aceQueue > 0) setTimeout(Engine.handleAce, 500); else UI.render();
+        },
+        returnFromVault: () => {
+            const e = state.board.findIndex(x=>x===null);
+            if(e===-1) return tg.showAlert("الشبكة ممتلئة!");
+            state.board[e] = state.vault[state.selVaultIdx];
+            state.vault[state.selVaultIdx] = null; state.selVaultIdx = null; UI.render();
+        },
+        fastCharge: () => { if(state.fastCharges > 0 && state.energy < 60){ state.energy = 60; state.fastCharges--; UI.render(); } },
+        buy: (i, p) => { if(state.gold>=p){ state.gold-=p; if(i==='bomb')state.bombs++; else state.energy=60; UI.render(); } }
+    };
+
+    /* =========================================
+       UI CONTROLLER (UI)
+       ========================================= */
+    const tg = window.Telegram.WebApp; tg.expand();
+
+    const UI = {
+        render: () => {
+            const g = document.getElementById('grid'); g.innerHTML = '';
+            state.board.forEach((c, i) => {
+                const cell = document.createElement('div');
+                cell.className = `cell ${state.selIdx === i ? 'selected' : ''}`;
+                if(c){
+                    const card = document.createElement('div');
+                    card.className = `card ${c.isNew?'anim-pop':''}`; card.style.color = c.suit.c;
+                    card.innerHTML = `<div class="rank">${c.rank}</div><div class="suit">${c.suit.i}</div>`;
+                    cell.appendChild(card); c.isNew = false;
+                }
+                cell.onclick = () => UI.handleClick(i); g.appendChild(cell);
+            });
+            UI.renderVault(); UI.updateStats();
+        },
+        handleClick: (idx) => {
+            if(state.selIdx === null) { if(state.board[idx] && state.board[idx].rank!=='🃏') state.selIdx = idx; }
+            else {
+                const from = state.selIdx, to = idx;
+                const c1 = state.board[from], c2 = state.board[to];
+                if(from === to) state.selIdx = null;
+                else if(!c2) { state.board[to]=c1; state.board[from]=null; state.selIdx=null; }
+                else if(c1.rank === c2.rank && c1.suit.id === c2.suit.id){
+                    const nxt = RANKS[RANKS.indexOf(c1.rank)+1];
+                    if(nxt==='A'){ state.board[to]=null; state.aceQueue++; Engine.handleAce(); }
+                    else state.board[to]={rank:nxt, suit:c1.suit, isNew:true};
+                    state.board[from]=null; state.merges++; state.selIdx=null;
+                    tg.HapticFeedback.impactOccurred('medium');
+                } else state.selIdx = state.board[idx] ? idx : null;
+            }
+            UI.render();
+        },
+        renderVault: () => {
+            const v = document.getElementById('v-grid'); v.innerHTML = '';
+            state.vault.forEach((c, i) => {
+                const cell = document.createElement('div'); cell.className = `v-cell ${state.selVaultIdx===i?'selected':''}`;
+                if(c){
+                    const card = document.createElement('div'); card.className='card'; card.style.color=c.suit.c;
+                    card.innerHTML = `<div class="rank">${c.rank}</div><div class="suit">${c.suit.i}</div>`;
+                    cell.appendChild(card);
+                    cell.onclick = () => { state.selVaultIdx=i; UI.render(); document.getElementById('return-btn').style.display='block'; };
+                } else {
+                    cell.onclick = () => { if(state.selIdx!==null){ const card=state.board[state.selIdx]; if(['J','Q','K'].includes(card.rank)){ state.vault[i]=card; state.board[state.selIdx]=null; state.selIdx=null; UI.render(); } } };
+                }
+                v.appendChild(cell);
+            });
+        },
+        updateStats: () => {
+            document.getElementById('gold-txt').innerText = state.gold;
+            document.getElementById('energy-val').innerText = state.energy + '/60 ⚡';
+            document.getElementById('energy-fill').style.width = (state.energy/60)*100 + '%';
+            document.getElementById('j-badge').innerText = state.jokers;
+            document.getElementById('b-badge').innerText = state.bombs;
+            document.getElementById('fc-badge').innerText = state.fastCharges;
+            document.getElementById('v-badge').innerText = state.vault.filter(x=>x).length;
+            document.getElementById('lvl-badge').innerText = Math.floor(state.merges/40)+1;
+            document.getElementById('rank-name').innerText = TITLES[Math.min(8, Math.floor(state.merges/40))];
+            document.getElementById('lvl-fill').style.width = (state.merges%40)*2.5 + '%';
+            document.getElementById('d-count-ui').innerText = `${state.diamond.filter(x=>x).length}/13`;
+            document.getElementById('j-inv').classList.toggle('has-stock', state.jokers > 0);
+            document.getElementById('bomb-btn').classList.toggle('has-stock', state.bombs > 0);
+        },
+        animateJokerFly: (cellIdx) => {
+            const rect = document.querySelectorAll('.cell')[cellIdx].getBoundingClientRect();
+            const target = document.getElementById('j-inv').getBoundingClientRect();
+            const flyer = document.createElement('div'); flyer.className = 'anim-fly'; flyer.innerHTML = '🃏';
+            flyer.style.cssText = `left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;`;
+            flyer.style.setProperty('--tx', (target.left - rect.left)+'px'); flyer.style.setProperty('--ty', (target.top - rect.top)+'px');
+            document.body.appendChild(flyer); state.board[cellIdx] = null; UI.render();
+            setTimeout(()=>{ flyer.remove(); state.jokers++; UI.render(); }, 2500);
+        },
+        drawDiamond: () => {
+            const svg = document.getElementById('diamond-svg');
+            const p = ["50,5 95,35 50,35", "50,5 50,35 5,35", "5,35 50,35 25,65", "50,35 75,65 25,65", "50,35 95,35 75,65", "25,65 50,95 5,35", "25,65 75,65 50,95", "75,65 95,35 50,95", "50,35 50,65 25,65", "50,35 75,65 50,65", "5,35 25,65 25,35", "95,35 75,65 75,35", "50,5 25,35 75,35"];
+            svg.innerHTML = p.map((d, i) => `<polygon points="${d}" class="tri-p ${state.diamond[i]?'active':''}" id="tri-${i}"/>`).join('');
+        },
+        animateBlast: () => { const l = document.getElementById('blast-layer'); l.classList.add('anim-blast'); setTimeout(()=>l.classList.remove('anim-blast'), 500); },
+        toggle: (id, s) => document.getElementById(id).style.display = s?'flex':'none'
+    };
+
+    setInterval(() => {
+        if(state.energy < 60) {
+            const d = Date.now() - state.lastRefill;
+            if(d >= 120000){ state.energy++; state.lastRefill = Date.now(); UI.render(); }
+            const r = Math.ceil((120000-d)/1000);
+            document.getElementById('timer-txt').innerText = `شحن: ${Math.floor(r/60)}:${(r%60).toString().padStart(2,'0')}`;
+        } else document.getElementById('timer-txt').innerText = "شحن كامل ✅";
+    }, 1000);
+
+    UI.drawDiamond(); UI.render();
+</script>
 </body>
 </html>
