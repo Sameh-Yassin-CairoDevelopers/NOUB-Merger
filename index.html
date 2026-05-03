@@ -3,29 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Noub Merger V12.0 - The Master Edition</title>
+    <title>Noub Merger V18.0 - Cloud Connected</title>
+    <!-- مكتبة تيليجرام ومكتبة Supabase السحابية -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg: #050c10; --accent: #ff2e63; --gold: #ffd700; --diamond: #00f2fe; --green: #27ae60; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { margin: 0; background: radial-gradient(circle at top, #163e4d, #050c10); font-family: system-ui, sans-serif; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; color: white; }
 
         /* Top Holy Bar */
-        .holy-bar { padding: calc(env(safe-area-inset-top) + 10px) 15px 5px; display: flex; justify-content: space-between; align-items: center; }
-        .icon-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; position: relative; cursor: pointer; }
-        .diamond-circle { width: 55px; height: 55px; border-radius: 50%; font-size: 32px; border: 2px solid var(--diamond); animation: pulse-slow 8s infinite; }
-        @keyframes pulse-slow { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--diamond); } 50% { transform: scale(1.05); box-shadow: 0 0 20px var(--diamond); } }
+        .holy-bar { padding: calc(env(safe-area-inset-top) + 15px) 20px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .icon-group { display: flex; gap: 10px; }
+        .icon-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; position: relative; cursor: pointer; transition: 0.2s; }
+        .icon-btn:active { transform: scale(0.9); }
+        
+        .center-hub { display: flex; flex-direction: column; align-items: center; cursor: pointer; transform: translateY(-5px); transition: 0.2s; }
+        .center-hub:active { transform: translateY(-5px) scale(0.95); }
+        .diamond-circle { width: 55px; height: 55px; border-radius: 50%; font-size: 30px; border: 2px solid var(--diamond); animation: pulse-slow 8s infinite; background: rgba(0,242,254,0.1); }
+        .player-name { font-size: 12px; margin-top: 6px; color: var(--gold); font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.8); max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        @keyframes pulse-slow { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--diamond); } 50% { transform: scale(1.05); box-shadow: 0 0 15px var(--diamond); } }
         .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; min-width: 16px; height: 16px; border-radius: 8px; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 1px solid #000; padding: 0 3px; }
-        .icon-btn.active-glow { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
 
-        /* Stats */
-        .lvl-pill { margin: 5px 15px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 20px; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
-        #lvl-fill { height: 4px; background: var(--gold); border-radius: 2px; width: 0%; transition: 0.3s; margin-top: 4px; }
+        /* Level Bar */
+        .level-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 320px; margin-bottom: 15px; }
+        .level-header { display: flex; justify-content: space-between; font-size: 14px; color: #ddd; margin-bottom: 8px; font-weight: bold; }
+        .diamond-icons { font-size: 22px; letter-spacing: 5px; }
+        .d-icon { filter: grayscale(100%) opacity(0.3); transition: 0.5s; display: inline-block; }
+        .d-icon.active { filter: none; opacity: 1; filter: drop-shadow(0 0 10px var(--diamond)); transform: scale(1.15); }
 
-        /* Grid 4x5 */
-        .game-zone { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; margin-top: -15px; }
+        /* Grid */
+        .game-zone { flex: 1; display: flex; align-items: center; justify-content: center; padding: 0 10px; margin-top: 10px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 250px; height: 100%; max-height: 330px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.02); border-radius: 6px; position: relative; border: 2px solid transparent; transition: 0.2s; }
+        .cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.02); border-radius: 6px; position: relative; border: 2px solid transparent; transition: 0.2s; touch-action: none; }
         .cell.selected { border-color: var(--gold); background: rgba(255,255,255,0.12); transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px var(--gold); }
 
         /* Cards */
@@ -37,21 +48,40 @@
         .control-bar { display: flex; justify-content: space-around; padding: 10px; background: rgba(0,0,0,0.4); gap: 8px; }
         .btn-util { width: 44px; height: 44px; border-radius: 10px; background: #1c2e36; border: 1px solid #444; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
         .btn-util.has-stock { background: var(--green); border-color: white; box-shadow: 0 0 10px var(--green); }
-        .btn-util.active { background: var(--diamond); color: #000; }
+        .btn-util.active { background: var(--diamond); color: #000; box-shadow: 0 0 15px var(--diamond); }
 
         /* Footer */
         .footer { padding: 5px 15px 20px; background: #091418; display: flex; gap: 8px; }
-        .btn-spawn { flex: 1; height: 55px; border-radius: 15px; border: none; background: linear-gradient(45deg, #ff2e63, #ff6b6b); color: white; font-size: 20px; font-weight: bold; box-shadow: 0 5px 0 #9d153a; }
+        .btn-spawn { flex: 1; height: 55px; border-radius: 15px; border: none; background: linear-gradient(45deg, #ff2e63, #ff6b6b); color: white; font-size: 20px; font-weight: bold; box-shadow: 0 5px 0 #9d153a; transition: 0.1s; }
+        .btn-spawn:active { transform: translateY(3px); box-shadow: 0 2px 0 #9d153a; }
         .btn-trash { width: 55px; height: 55px; border-radius: 15px; background: #1c2e36; border: 1px solid #444; color: #aaa; font-size: 22px; display: flex; align-items: center; justify-content: center; }
 
-        /* Modals */
-        .overlay { position: fixed; inset: 0; background: rgba(5, 12, 16, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 40px 20px; text-align: center; }
+        /* Modals & History */
+        .overlay { position: fixed; inset: 0; background: rgba(5, 12, 16, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 30px 20px; text-align: center; overflow-y: auto; }
         .v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 220px; margin-top: 15px; }
         .v-cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.05); border: 1px dashed #444; border-radius: 6px; position: relative; }
         .v-cell.selected { border: 2px solid var(--diamond); box-shadow: 0 0 10px var(--diamond); }
-        .diamond-svg { width: 250px; height: 250px; margin: 15px 0; }
-        .tri-p { fill: #1c2e36; stroke: #333; stroke-width: 0.5; transition: 0.5s; }
-        .tri-p.active { fill: var(--diamond); filter: drop-shadow(0 0 10px var(--diamond)); stroke: #fff; }
+        
+        .diamond-svg { width: 200px; height: 200px; margin: 5px 0; filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.3)); }
+        .tri-p { fill: rgba(0, 0, 0, 0.4); stroke: #444; stroke-width: 0.5; stroke-linejoin: round; transition: all 0.5s ease; }
+        .tri-p.active { fill: rgba(0, 242, 254, 0.7); stroke: #fff; stroke-width: 1.5; filter: drop-shadow(0 0 5px var(--diamond)); }
+
+        .history-box { width: 100%; max-width: 320px; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px; margin-top: 10px; max-height: 150px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.05); }
+        .h-item { font-size: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .h-item:last-child { border: none; padding-bottom: 0; }
+        .h-dup { color: var(--gold); }
+        .h-new { color: var(--diamond); }
+
+        .store-item { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 12px; display: flex; align-items: center; justify-content: space-between; text-align: right; margin-bottom: 12px; }
+        .s-icon { font-size: 28px; margin-left: 12px; background: rgba(0,0,0,0.4); width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .s-info { flex: 1; }
+        .s-title { font-weight: bold; font-size: 15px; color: white; }
+        .s-desc { font-size: 11px; color: #aaa; margin-top: 4px; }
+        .s-buy { background: var(--gold); color: #000; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 0 #b39700; cursor: pointer; transition: 0.1s; min-width: 80px; }
+        .s-buy:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+        /* Loader Overlay for Cloud Sync */
+        #cloud-loader { position: fixed; inset: 0; background: #050c10; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gold); font-weight: bold; font-size: 18px; transition: opacity 0.5s; }
 
         /* Animations */
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
@@ -61,28 +91,57 @@
         .blast { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 1000; }
         @keyframes blast-anim { 0% { opacity: 0.7; } 100% { opacity: 0; } }
         .anim-blast { animation: blast-anim 0.5s ease-out; }
+        #drag-ghost { position: absolute; z-index: 9999; pointer-events: none; opacity: 0.9; transform: scale(1.1) rotate(2deg); box-shadow: 0 15px 25px rgba(0,0,0,0.6); transition: transform 0.1s; }
+        @keyframes diamond-pop { 0% { transform: scale(0.2); opacity: 1; } 50% { transform: scale(1.5); } 100% { transform: scale(2); opacity: 0; } }
+        .royal-spark { position: fixed; z-index: 9999; pointer-events: none; display: flex; align-items: center; justify-content: center; font-size: 50px; animation: diamond-pop 0.6s ease-out forwards; text-shadow: 0 0 20px #00f2fe; }
     </style>
 </head>
 <body>
 
+    <!-- Cloud Loader -->
+    <div id="cloud-loader">
+        <div style="font-size: 40px; margin-bottom: 10px;">☁️</div>
+        جاري مزامنة الخزنة الملكية...
+    </div>
+
     <!-- TOP SECTION -->
     <div class="holy-bar">
-        <div class="icon-btn diamond-circle" onclick="UI.toggle('diamond-scr', true)">💎</div>
-        <div class="icon-btn" onclick="UI.toggle('store-scr', true)">🏪</div>
-        <div id="v-btn" class="icon-btn" onclick="UI.toggle('vault-scr', true)">🏦 <div class="badge" id="v-badge">0</div></div>
-        <div class="icon-btn" onclick="tg.showAlert('قائمة المتصدرين قريباً')">🏆 <div class="badge" id="lvl-badge">1</div></div>
-    </div>
-    
-    <div class="rank-label">الرتبة: <b id="rank-name">NOBLE</b> | <span id="d-count-ui">0/13</span><div id="lvl-fill"></div></div>
+        <div class="icon-group">
+            <div class="icon-btn" onclick="UI.toggle('wallet-scr', true)" style="padding: 6px;">
+                <svg viewBox="0 0 64 64" style="width: 100%; height: 100%;">
+                    <rect x="4" y="20" width="56" height="34" rx="4" fill="#8E5A28" />
+                    <rect x="10" y="10" width="44" height="20" rx="3" fill="#D2A669" />
+                    <rect x="14" y="6" width="36" height="20" rx="3" fill="#E8C382" />
+                    <rect x="4" y="26" width="56" height="28" rx="4" fill="#A86E32" />
+                    <rect x="46" y="22" width="14" height="20" rx="4" fill="#A86E32" />
+                    <circle cx="53" cy="32" r="3" fill="#D2A669" />
+                    <path d="M 6 30 L 60 30" stroke="#8E5A28" stroke-width="1.5" stroke-dasharray="3,2"/>
+                </svg>
+            </div>
+            <div class="icon-btn" onclick="UI.toggle('store-scr', true)">🏪</div>
+        </div>
+        
+        <div class="center-hub" onclick="UI.openDiamondScreen()">
+            <div class="icon-btn diamond-circle">💎</div>
+            <div id="player-name" class="player-name">...</div>
+        </div>
 
+        <div class="icon-group">
+            <div id="v-btn" class="icon-btn" onclick="UI.toggle('vault-scr', true)">🏦 <div class="badge" id="v-badge">0</div></div>
+            <div class="icon-btn" onclick="UI.toggle('map-scr', true); UI.renderMap();">🗺️</div>
+        </div>
+    </div>
+
+    <!-- Main Game Grid -->
     <div class="game-zone">
         <div id="blast-layer" class="blast"></div>
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- CONTROL TOOLS -->
+    <!-- Control Tools -->
     <div class="control-bar">
         <div class="btn-util" id="fc-btn" onclick="Engine.fastCharge()" style="color:yellow">⚡<div class="badge" id="fc-badge">10</div></div>
+        <div class="btn-util" id="m-btn" onclick="Engine.toggleMagnet()" style="font-size:24px">🧲<div class="badge" id="m-badge">2</div></div>
         <div class="btn-util" id="bomb-btn" onclick="Engine.useBomb()">💣<div class="badge" id="b-badge">2</div></div>
         <div class="btn-util" id="j-inv" onclick="Engine.useJoker()" style="font-size:26px">🃏<div class="badge" id="j-badge">3</div></div>
         <div class="btn-util" id="auto-btn" onclick="Engine.toggleAuto()">🪄</div>
@@ -93,101 +152,286 @@
         <div style="height:3px; background:#111; margin-top:2px; border-radius:2px; overflow:hidden;"><div id="energy-fill" style="height:100%; background:#00d2ff; width:0%;"></div></div>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer">
         <div class="btn-trash" onclick="Engine.trash()">🗑️</div>
         <button class="btn-spawn" id="spawn-btn" onclick="Engine.spawn()">إنشاء كارت (⚡1)</button>
     </div>
 
-    <!-- MODALS -->
+    <!-- Modals -->
+    <div id="wallet-scr" class="overlay">
+        <h2 style="color:var(--diamond);">محفظة Web3 👛</h2>
+        <p style="color:#aaa; font-size:14px; text-align:center; max-width:80%; margin: 10px 0;">رصيدك من نجوم تيليجرام وعملات TON سيظهر هنا عند التفعيل الكامل.</p>
+        <div style="background:rgba(255,255,255,0.05); border-radius:15px; padding:20px; margin:20px 0; width:100%; max-width:300px;">
+            <div style="font-size:40px; margin-bottom:10px;">⭐️ 0</div>
+            <div style="color:var(--gold); font-weight:bold;">نجوم تيليجرام</div>
+        </div>
+        <button class="btn-spawn" style="background:#444; width:150px; box-shadow: 0 4px 0 #222;" onclick="UI.toggle('wallet-scr', false)">العودة</button>
+    </div>
+
     <div id="diamond-scr" class="overlay">
-        <h2>الماسة الملكية</h2>
+        <div class="level-bar">
+            <div class="level-header">
+                <span id="d-count-ui">القطع: 0/13</span>
+                <b style="color:var(--gold); font-size:15px;" id="current-lvl-txt">المرحلة 1</b>
+            </div>
+            <div id="level-diamonds-ui" class="diamond-icons"></div>
+        </div>
+        <div style="font-size:12px; color:#aaa; margin-bottom: 5px;">إجمالي الجواهر المكتملة: <b id="total-d-txt" style="color:var(--gold); font-size:14px;">0</b></div>
         <div class="diamond-svg"><svg viewBox="0 0 100 100" id="diamond-svg"></svg></div>
-        <button class="btn-spawn" style="width:150px" onclick="UI.toggle('diamond-scr', false)">العودة</button>
+        <div class="history-box" id="history-box"></div>
+        <button class="btn-spawn" style="width:150px; background:#444; margin-top: 15px; box-shadow: 0 4px 0 #222;" onclick="UI.toggle('diamond-scr', false)">إغلاق الخزينة</button>
+    </div>
+
+    <div id="map-scr" class="overlay">
+        <h2>خريطة الرحلة 🗺️</h2>
+        <div id="map-content" style="width:100%; max-height: 65vh; overflow-y: auto; text-align: right; padding: 10px; margin-top: 10px;"></div>
+        <button class="btn-spawn" style="width:150px; background:#444; margin-top:15px; box-shadow: 0 4px 0 #222;" onclick="UI.toggle('map-scr', false)">العودة للعب</button>
+    </div>
+
+    <div id="lvl-up-modal" class="overlay" style="justify-content:center">
+        <div id="lvl-up-msg" style="margin:20px; font-size:18px; line-height: 1.6;"></div>
+        <button class="btn-spawn" style="width:200px; margin-top:20px;" onclick="Engine.closeLevelUp()">متابعة الرحلة</button>
     </div>
 
     <div id="store-scr" class="overlay">
-        <h2>المتجر</h2>
-        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:20px; width:100%; margin:20px 0;">
-            <p>الذهب: <b id="gold-txt">600</b> 💰</p>
-            <button class="btn-spawn" style="height:45px; font-size:14px; margin-top:10px" onclick="Engine.buy('bomb', 200)">شراء قنبلة (200💰)</button>
-            <button class="btn-spawn" style="height:45px; font-size:14px; margin-top:10px" onclick="Engine.buy('energy', 500)">شحن طاقة (500💰)</button>
+        <h2 style="color:var(--gold); margin-bottom: 5px;">المتجر الملكي 🏪</h2>
+        <div style="font-size: 18px; margin-bottom: 20px; background: rgba(255,215,0,0.1); padding: 8px 25px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.3);">
+            رصيدك: <b id="gold-txt" style="color:var(--gold)">600</b> 💰
         </div>
-        <button class="btn-spawn" style="background:#333" onclick="UI.toggle('store-scr', false)">إغلاق</button>
+        <div style="width: 100%; max-width: 340px; display: flex; flex-direction: column;">
+            <div class="store-item"><div class="s-icon">🧲</div><div class="s-info"><div class="s-title">مغناطيس الدمج</div><div class="s-desc">يسحب ويجمع الكروت المتشابهة</div></div><button class="s-buy" onclick="Engine.buy('magnet', 200)">200 💰</button></div>
+            <div class="store-item"><div class="s-icon">💣</div><div class="s-info"><div class="s-title">قنبلة الترقية</div><div class="s-desc">ترقي الكروت للرتبة الأعلى فوراً</div></div><button class="s-buy" onclick="Engine.buy('bomb', 200)">200 💰</button></div>
+            <div class="store-item"><div class="s-icon">⚡</div><div class="s-info"><div class="s-title">شحن طاقة</div><div class="s-desc">يملأ عداد الطاقة للحد الأقصى</div></div><button class="s-buy" onclick="Engine.buy('energy', 500)">500 💰</button></div>
+        </div>
+        <button class="btn-spawn" style="background:#444; width:150px; margin-top:15px; box-shadow: 0 4px 0 #222;" onclick="UI.toggle('store-scr', false)">إغلاق</button>
     </div>
 
     <div id="vault-scr" class="overlay">
         <h2>الخزنة الملكية</h2>
         <div class="v-grid" id="v-grid"></div>
         <button id="return-btn" class="btn-spawn" style="display:none; background:var(--gold); color:#000; margin-top:20px" onclick="Engine.returnFromVault()">إرجاع للشبكة</button>
-        <button class="btn-spawn" style="width:150px; background:#444; margin-top:15px" onclick="UI.toggle('vault-scr', false)">إغلاق</button>
+        <button class="btn-spawn" style="width:150px; background:#444; margin-top:15px; box-shadow: 0 4px 0 #222;" onclick="UI.toggle('vault-scr', false)">إغلاق</button>
     </div>
 
     <div id="ace-modal" class="overlay" style="justify-content:center">
         <h1 style="color:var(--diamond)">اكتشاف ملكي! 💎</h1>
-        <div id="ace-msg" style="margin:20px; font-size:18px"></div>
-        <button class="btn-spawn" onclick="Engine.aceChoice('sell')">بيع (200💰)</button>
-        <button class="btn-spawn" style="margin-top:10px" onclick="Engine.aceChoice('keep')">احتفاظ</button>
+        <div id="ace-msg" style="margin:20px; font-size:18px; line-height: 1.5;"></div>
+        <button id="ace-btn-sell" class="btn-spawn" onclick="Engine.aceChoice('sell')">بيع (300💰)</button>
+        <button id="ace-btn-keep" class="btn-spawn" style="margin-top:10px" onclick="Engine.aceChoice('keep')">احتفاظ</button>
     </div>
 
 <script>
     /* =========================================
-       CORE ENGINE LOGIC (Engine)
+       تهيئة Supabase و Telegram Web3 Identity
        ========================================= */
-    const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-    const TITLES = ['NOBLE','BARON','COUNT','MARQUIS','DUKE','PRINCE','KING','EMPEROR','LORD'];
-    const SUITS = [{id:'S',i:'♠️',c:'#222'},{id:'H',i:'♥️',c:'#d32f2f'},{id:'D',i:'♦️',c:'#d32f2f'},{id:'C',i:'♣️',c:'#222'}];
+    // ⚠️ ضع بيانات الـ Supabase الخاصة بك هنا (URL و ANON_KEY)
+    const SUPABASE_URL = 'https://eqwsfnivhgguzbuzfsca.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxd3Nmbml2aGdndXpidXpmc2NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkyNzYsImV4cCI6MjA5MzM1NTI3Nn0.3-iiWo4DeQACqmQ5SNN0xBiRwKp2E3XsKQqH6aTbbPs';
+    
+    // إنشاء عميل سوبابيز (سيتم تفعيله متى ما وضعت الروابط الحقيقية)
+    let supabase = null;
+    try {
+        if(SUPABASE_URL !== 'https://eqwsfnivhgguzbuzfsca.supabase.co') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch(e) { console.error("Supabase init failed", e); }
 
-    let state = {
-        gold: 600, energy: 60, merges: 0,
+    var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : {};
+    if (!tg.showAlert) tg.showAlert = function(msg) { alert(msg); };
+    if (!tg.HapticFeedback) tg.HapticFeedback = { impactOccurred: function(){}, notificationOccurred: function(){} };
+    try { if (tg.expand) tg.expand(); } catch (e) { console.warn("Telegram WebApp Error Ignored:", e); }
+
+    var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : { id: 'test_user_01', first_name: 'لاعب تجريبي' };
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('player-name').innerText = tgUser.first_name;
+    });
+    
+    var RANKS =['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+    var SUITS =[{id:'S',i:'♠️',c:'#222'},{id:'H',i:'♥️',c:'#d32f2f'},{id:'D',i:'♦️',c:'#d32f2f'},{id:'C',i:'♣️',c:'#222'}];
+
+    var state = {
+        level: 1, fullDiamonds: 0, totalDiamondsCreated: 0,
+        gold: 600, energy: 60,
         board: Array(20).fill(null), vault: Array(12).fill(null),
-        jokers: 3, bombs: 2, fastCharges: 10,
+        jokers: 3, bombs: 2, fastCharges: 10, magnets: 2,
         diamond: Array(13).fill(false), lastRefill: Date.now(),
-        isAuto: false, selIdx: null, selVaultIdx: null, aceQueue: 0
+        isAuto: false, selIdx: null, selVaultIdx: null, aceQueue: 0,
+        isMagnetMode: false, pendingReward: null, history:[] 
     };
 
-    const Engine = {
+    const REFILL_RATE = 90000;
+    const DROP_RATES =[
+        { id: '🃏', p: 0.050 }, { id: '2',  p: 0.350 }, { id: '3',  p: 0.200 }, 
+        { id: '4',  p: 0.150 }, { id: '5',  p: 0.100 }, { id: '6',  p: 0.050 }, 
+        { id: '7',  p: 0.035 }, { id: '8',  p: 0.025 }, { id: '9',  p: 0.015 }, 
+        { id: '10', p: 0.012 }, { id: 'J',  p: 0.008 }, { id: 'Q',  p: 0.004 }, { id: 'K',  p: 0.001 }  
+    ];
+
+    function getWeightedDrop() {
+        const rand = Math.random(); let cumulative = 0;
+        for (let item of DROP_RATES) { cumulative += item.p; if (rand <= cumulative) return item.id; }
+        return '2'; 
+    }
+
+    /* 
+     * نظام الحفظ السحابي (Cloud Save Logic)
+     * واجهة المستخدم المتفائلة (Optimistic UI)
+     */
+    async function loadGame() {
+        document.getElementById('cloud-loader').style.display = 'flex';
+        
+        let loadedState = null;
+
+        // 1. محاولة القراءة من Supabase إذا كان مفعلاً
+        if (supabase) {
+            try {
+                const { data, error } = await supabase.from('player_saves').select('game_state').eq('telegram_id', tgUser.id).single();
+                if (data && data.game_state) loadedState = data.game_state;
+            } catch(e) { console.error("Cloud load failed, falling back to local."); }
+        }
+
+        // 2. إذا فشل السحابي أو لم يتم إعداده بعد، نقرأ محلياً
+        if (!loadedState) {
+            const local = localStorage.getItem(`noub_save_${tgUser.id}`);
+            if (local) loadedState = JSON.parse(local);
+        }
+
+        // تطبيق البيانات المحملة
+        if (loadedState) {
+            state = { ...state, ...loadedState };
+            
+            // تنظيف الجواكر (حماية)
+            for(let i=0; i<20; i++){
+                if(state.board[i] && state.board[i].rank === '🃏') {
+                    state.board[i] = null; state.jokers++;
+                }
+            }
+
+            const now = Date.now();
+            const diffMs = now - state.lastRefill;
+            const earnedEnergy = Math.floor(diffMs / REFILL_RATE);
+            if (earnedEnergy > 0 && state.energy < 60) {
+                state.energy = Math.min(60, state.energy + earnedEnergy);
+                state.lastRefill = now - (diffMs % REFILL_RATE); 
+            }
+            state.isAuto = false; state.selIdx = null; state.isMagnetMode = false;
+        }
+
+        document.getElementById('cloud-loader').style.opacity = '0';
+        setTimeout(() => document.getElementById('cloud-loader').style.display = 'none', 500);
+        
+        UI.render();
+    }
+
+    // الحفظ المتفائل (يحفظ محلياً فوراً، ويرسل للسحابة بصمت)
+    function saveGame() {
+        const stateToSave = JSON.stringify(state);
+        // حفظ محلي لسرعة اللعب
+        localStorage.setItem(`noub_save_${tgUser.id}`, stateToSave);
+        
+        // رفع للسحابة في الخلفية (Fire and Forget)
+        if(supabase) {
+            supabase.from('player_saves').upsert({
+                telegram_id: tgUser.id.toString(),
+                player_name: tgUser.first_name,
+                game_state: state
+            }).then(({error}) => {
+                if(error) console.error("Cloud save error:", error);
+            });
+        }
+    }
+
+    function logHistory(msg, type) {
+        state.history.unshift({ msg: msg, type: type, time: Date.now() });
+        if(state.history.length > 50) state.history.pop(); 
+    }
+
+    /* =========================================
+       CORE ENGINE LOGIC (المحرك يظل كما هو تماماً لضمان اللعب)
+       ========================================= */
+    var Engine = {
         spawn: () => {
             const e = state.board.findIndex(x=>x===null);
             if(e===-1) return tg.showAlert("الشبكة ممتلئة!");
             if(state.energy <= 0) return;
-            const luck = Math.random();
-            if(luck < 0.07) {
-                state.board[e] = { rank: '🃏', suit: {c: '#8e44ad', i: ''} };
-                UI.render(); setTimeout(() => UI.animateJokerFly(e), 1200);
+            const r = getWeightedDrop();
+            state.energy--; 
+            if(r === '🃏') {
+                UI.render(); UI.animateJokerFlyFrom(e);
             } else {
-                let r = RANKS[Math.floor(Math.random()*4)];
-                if(luck < 0.15) r = luck < 0.05 ? 'Q' : (luck < 0.10 ? 'J' : '10');
                 state.board[e] = { rank: r, suit: SUITS[Math.floor(Math.random()*4)], suitId: SUITS[Math.floor(Math.random()*4)].id, isNew: true };
+                UI.render();
             }
-            state.energy--; UI.render();
         },
         useBomb: () => {
             if(state.bombs <= 0) return;
             UI.animateBlast();
             let nA = 0;
-            state.board = state.board.map(c => {
+            state.board = state.board.map((c, idx) => {
                 if(!c || c.rank==='A' || c.rank==='🃏') return c;
                 const nxt = RANKS[RANKS.indexOf(c.rank)+1];
-                if(nxt==='A'){ nA++; return null; }
+                if(nxt==='A'){ nA++; UI.showRoyalSpark(idx); return null; }
                 return {rank:nxt, suit:c.suit, isNew:true};
             });
             state.bombs--; state.aceQueue += nA; 
-            UI.render(); if(state.aceQueue > 0) Engine.handleAce();
+            UI.render(); 
+            if(state.aceQueue > 0) setTimeout(() => Engine.handleAce(), 600);
         },
         useJoker: () => {
             if(state.jokers <= 0 || state.selIdx === null) return tg.showAlert("اختر كارت أولاً!");
             const c = state.board[state.selIdx];
             if(c.rank==='A' || c.rank==='🃏') return;
             const nxt = RANKS[RANKS.indexOf(c.rank)+1];
-            if(nxt==='A'){ state.board[state.selIdx]=null; state.aceQueue++; Engine.handleAce(); }
-            else state.board[state.selIdx]={rank:nxt, suit:c.suit, isNew:true};
+            if(nxt==='A'){ 
+                const targetIdx = state.selIdx;
+                state.board[state.selIdx]=null; state.aceQueue++; 
+                UI.showRoyalSpark(targetIdx);
+                setTimeout(() => Engine.handleAce(), 600); 
+            }
+            else { state.board[state.selIdx]={rank:nxt, suit:c.suit, isNew:true}; }
             state.jokers--; state.selIdx=null; UI.render();
+        },
+        toggleMagnet: () => {
+            if(state.magnets <= 0) return;
+            state.isMagnetMode = !state.isMagnetMode;
+            document.getElementById('m-btn').classList.toggle('active', state.isMagnetMode);
+        },
+        executeMagnet: (targetIdx) => {
+            const targetCard = state.board[targetIdx];
+            const suitId = targetCard.suit.id;
+            let sum = 0, count = 0;
+            for(let i=0; i<20; i++) {
+                const c = state.board[i];
+                if (c && c.rank !== '🃏' && c.rank !== 'A' && c.suit.id === suitId) {
+                    sum += RANKS.indexOf(c.rank) + 2; state.board[i] = null; count++;
+                }
+            }
+            if (count > 0) {
+                UI.animateBlast(); 
+                const numKs = Math.floor(sum / 13);
+                const remainder = sum % 13;
+                const newCards =[];
+                for(let i=0; i<numKs; i++) newCards.push({rank: 'K', suit: targetCard.suit, isNew: true});
+                if (remainder > 1) newCards.push({rank: RANKS[remainder-2], suit: targetCard.suit, isNew: true});
+                
+                let cardIdx = 0;
+                if (cardIdx < newCards.length) state.board[targetIdx] = newCards[cardIdx++];
+                for(let i=0; i<20 && cardIdx < newCards.length; i++) {
+                    if (!state.board[i]) state.board[i] = newCards[cardIdx++];
+                }
+                state.magnets--;
+                if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            }
+            state.isMagnetMode = false; document.getElementById('m-btn').classList.remove('active'); UI.render();
         },
         trash: () => { if(state.selIdx !== null){ state.board[state.selIdx]=null; state.selIdx=null; UI.render(); } },
         toggleAuto: () => { state.isAuto = !state.isAuto; document.getElementById('auto-btn').classList.toggle('active', state.isAuto); if(state.isAuto) Engine.runAuto(); },
         runAuto: () => {
             if(!state.isAuto) return;
+            if(state.aceQueue > 0 || document.getElementById('ace-modal').style.display === 'flex' || document.getElementById('lvl-up-modal').style.display === 'flex') {
+                setTimeout(Engine.runAuto, 1000); return;
+            }
             let m = false;
             for(let i=0; i<20; i++){
                 for(let j=i+1; j<20; j++){
@@ -202,18 +446,88 @@
             if(m) setTimeout(Engine.runAuto, 400);
             else { state.isAuto=false; document.getElementById('auto-btn').classList.remove('active'); }
         },
+        
         handleAce: () => {
             if(state.aceQueue <= 0) return;
             state.pendingAce = Math.floor(Math.random()*13);
-            document.getElementById('ace-msg').innerText = `حصلت على القطعة رقم ${state.pendingAce+1}`;
+            const isDuplicate = state.diamond[state.pendingAce];
+            
+            if (isDuplicate) {
+                state.pendingReward = Math.random() > 0.5 ? 'magnet' : 'bomb';
+                const toolName = state.pendingReward === 'magnet' ? 'مغناطيس 🧲' : 'قنبلة 💣';
+                document.getElementById('ace-msg').innerHTML = `<span style="color:#aaa">القطعة رقم ${state.pendingAce+1} مكررة!</span><br><b style="color:var(--gold)">الملك يعوضك بـ ${toolName}</b>`;
+                document.getElementById('ace-btn-sell').style.display = 'none';
+                document.getElementById('ace-btn-keep').innerText = 'استلام المكافأة';
+            } else {
+                state.pendingReward = null;
+                document.getElementById('ace-msg').innerHTML = `حصلت على القطعة الماسية رقم ${state.pendingAce+1}`;
+                document.getElementById('ace-btn-sell').style.display = 'block';
+                document.getElementById('ace-btn-keep').innerText = 'إضافة للماسة';
+            }
             UI.toggle('ace-modal', true);
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         },
+
         aceChoice: (c) => {
-            if(c==='sell') state.gold += 200;
-            else if(!state.diamond[state.pendingAce]){ state.diamond[state.pendingAce]=true; UI.drawDiamond(); }
-            UI.toggle('ace-modal', false); state.aceQueue--;
-            if(state.aceQueue > 0) setTimeout(Engine.handleAce, 500); else UI.render();
+            let diamondFilledNow = false;
+            if (state.pendingReward) {
+                if (state.pendingReward === 'magnet') { state.magnets++; logHistory(`قطعة مكررة #${state.pendingAce+1} (عوضك الملك بـ 🧲)`, 'dup'); }
+                else { state.bombs++; logHistory(`قطعة مكررة #${state.pendingAce+1} (عوضك الملك بـ 💣)`, 'dup'); }
+                state.pendingReward = null;
+            } else {
+                if(c==='sell') {
+                    state.gold += 300; 
+                    logHistory(`تم بيع القطعة #${state.pendingAce+1} مقابل 300💰`, 'dup');
+                } else { 
+                    state.diamond[state.pendingAce] = true; 
+                    logHistory(`اكتشاف قطعة جديدة #${state.pendingAce+1} 💎`, 'new');
+                    UI.drawDiamond(); 
+                    if(state.diamond.every(x => x)) diamondFilledNow = true;
+                }
+            }
+            UI.toggle('ace-modal', false); 
+            
+            if (diamondFilledNow) setTimeout(() => Engine.completeDiamond(), 600);
+            else {
+                state.aceQueue--;
+                if(state.aceQueue > 0) setTimeout(Engine.handleAce, 500); else UI.render();
+            }
         },
+
+        completeDiamond: () => {
+            state.diamond = Array(13).fill(false);
+            state.fullDiamonds++;
+            state.totalDiamondsCreated++; 
+            logHistory(`✨ اكتملت ماسة كاملة!`, 'new');
+            
+            const reqDiamonds = Math.floor(state.level / 2) + 1; 
+            let msg = `<h1 style="color:var(--diamond)">اكتملت الماسة! 💎</h1><p>لقد أضفت جوهرة مشعة لرصيد المرحلة الحالية.</p>`;
+            
+            if (state.fullDiamonds >= reqDiamonds) {
+                state.level++;
+                state.fullDiamonds = 0;
+                state.gold += 1000; state.magnets += 2; state.bombs += 2; state.energy = 60;
+                logHistory(`🎉 الترقية للمرحلة ${state.level}!`, 'new');
+                msg = `<h1 style="color:var(--gold)">🎉 ترقية للمرحلة ${state.level}! 🎉</h1>
+                       <p>لقد جمعت كل الجواهر المطلوبة ببراعة!</p>
+                       <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin:10px 0;">
+                           <span style="color:var(--green); font-size:14px;">المكافأة: 1000💰 + 2🧲 + 2💣 + طاقة كاملة</span><br>
+                           <b style="color:#ffcc00; font-size:12px;">+ 10 نجوم تيليجرام ⭐️ (قريباً)</b>
+                       </div>`;
+                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            }
+            document.getElementById('lvl-up-msg').innerHTML = msg;
+            UI.toggle('lvl-up-modal', true);
+            UI.drawDiamond(); UI.render();
+        },
+
+        closeLevelUp: () => {
+            UI.toggle('lvl-up-modal', false);
+            state.aceQueue--;
+            if(state.aceQueue > 0) setTimeout(Engine.handleAce, 500); 
+            else UI.render();
+        },
+
         returnFromVault: () => {
             const e = state.board.findIndex(x=>x===null);
             if(e===-1) return tg.showAlert("الشبكة ممتلئة!");
@@ -221,29 +535,99 @@
             state.vault[state.selVaultIdx] = null; state.selVaultIdx = null; UI.render();
         },
         fastCharge: () => { if(state.fastCharges > 0 && state.energy < 60){ state.energy = 60; state.fastCharges--; UI.render(); } },
-        buy: (i, p) => { if(state.gold>=p){ state.gold-=p; if(i==='bomb')state.bombs++; else state.energy=60; UI.render(); } }
+        buy: (i, p) => { 
+            if(state.gold>=p){ 
+                state.gold-=p; 
+                if(i==='bomb') state.bombs++; else if(i==='magnet') state.magnets++; else state.energy=60; 
+                UI.render(); 
+            } else tg.showAlert("الذهب لا يكفي!");
+        }
     };
 
     /* =========================================
-       UI CONTROLLER (UI)
+       UI CONTROLLER 
        ========================================= */
-    const tg = window.Telegram.WebApp; tg.expand();
-
-    const UI = {
+    var UI = {
         render: () => {
             const g = document.getElementById('grid'); g.innerHTML = '';
             state.board.forEach((c, i) => {
                 const cell = document.createElement('div');
                 cell.className = `cell ${state.selIdx === i ? 'selected' : ''}`;
+                cell.dataset.index = i;
+
                 if(c){
                     const card = document.createElement('div');
                     card.className = `card ${c.isNew?'anim-pop':''}`; card.style.color = c.suit.c;
                     card.innerHTML = `<div class="rank">${c.rank}</div><div class="suit">${c.suit.i}</div>`;
                     cell.appendChild(card); c.isNew = false;
                 }
-                cell.onclick = () => UI.handleClick(i); g.appendChild(cell);
+                
+                cell.onpointerdown = (e) => {
+                    if(e.button !== undefined && e.button !== 0) return; 
+                    if(state.isMagnetMode) {
+                        if(c && c.rank !== '🃏' && c.rank !== 'A') { Engine.executeMagnet(i); }
+                        return;
+                    }
+                    if(!c || (state.selIdx !== null && state.selIdx !== i) || (c && c.rank === '🃏')) {
+                        UI.handleClick(i); return;
+                    }
+
+                    e.preventDefault();
+                    const wasSelected = (state.selIdx === i);
+                    state.selIdx = i;
+                    document.querySelectorAll('#grid .cell').forEach(el => el.classList.remove('selected'));
+                    cell.classList.add('selected');
+                    UI.updateStats(); 
+
+                    const cardElem = cell.querySelector('.card');
+                    if(cardElem) cardElem.style.opacity = '0.4'; 
+
+                    const clone = cardElem.cloneNode(true);
+                    clone.id = 'drag-ghost';
+                    clone.style.width = cardElem.offsetWidth + 'px';
+                    clone.style.height = cardElem.offsetHeight + 'px';
+                    document.body.appendChild(clone);
+
+                    let isDragging = false;
+                    const moveGhost = (pageX, pageY) => {
+                        clone.style.left = (pageX - clone.offsetWidth / 2) + 'px';
+                        clone.style.top = (pageY - clone.offsetHeight / 2) + 'px';
+                    };
+                    moveGhost(e.pageX, e.pageY);
+
+                    const onMove = (eMove) => {
+                        if(Math.abs(eMove.pageX - e.pageX) > 5 || Math.abs(eMove.pageY - e.pageY) > 5) isDragging = true;
+                        moveGhost(eMove.pageX, eMove.pageY);
+                    };
+
+                    const onUp = (eUp) => {
+                        document.removeEventListener('pointermove', onMove);
+                        document.removeEventListener('pointerup', onUp);
+                        if(cardElem) cardElem.style.opacity = '1'; 
+                        
+                        const ghost = document.getElementById('drag-ghost');
+                        if(ghost) ghost.remove();
+
+                        if(!isDragging) { if(wasSelected) { state.selIdx = null; UI.render(); } return; }
+
+                        let targetIdx = -1, minD = Infinity;
+                        document.querySelectorAll('#grid .cell').forEach((cellEl) => {
+                            const rect = cellEl.getBoundingClientRect();
+                            const dist = Math.hypot((rect.left + rect.width / 2) - eUp.clientX, (rect.top + rect.height / 2) - eUp.clientY);
+                            if(dist < minD) { minD = dist; targetIdx = parseInt(cellEl.dataset.index); }
+                        });
+
+                        if (targetIdx !== -1 && minD < 60) {
+                            if (targetIdx !== i) { UI.handleDrop(i, targetIdx); return; }
+                        }
+                        UI.render(); 
+                    };
+                    document.addEventListener('pointermove', onMove); document.addEventListener('pointerup', onUp);
+                };
+                g.appendChild(cell);
             });
             UI.renderVault(); UI.updateStats();
+            saveGame();
         },
         handleClick: (idx) => {
             if(state.selIdx === null) { if(state.board[idx] && state.board[idx].rank!=='🃏') state.selIdx = idx; }
@@ -254,13 +638,40 @@
                 else if(!c2) { state.board[to]=c1; state.board[from]=null; state.selIdx=null; }
                 else if(c1.rank === c2.rank && c1.suit.id === c2.suit.id){
                     const nxt = RANKS[RANKS.indexOf(c1.rank)+1];
-                    if(nxt==='A'){ state.board[to]=null; state.aceQueue++; Engine.handleAce(); }
-                    else state.board[to]={rank:nxt, suit:c1.suit, isNew:true};
-                    state.board[from]=null; state.merges++; state.selIdx=null;
-                    tg.HapticFeedback.impactOccurred('medium');
+                    if(nxt==='A'){ 
+                        state.board[to]=null; state.aceQueue++; UI.showRoyalSpark(to);
+                        setTimeout(() => Engine.handleAce(), 600); 
+                    }
+                    else { state.board[to]={rank:nxt, suit:c1.suit, isNew:true}; }
+                    state.board[from]=null; state.selIdx=null;
+                    if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
                 } else state.selIdx = state.board[idx] ? idx : null;
             }
             UI.render();
+        },
+        handleDrop: (from, to) => {
+            const c1 = state.board[from], c2 = state.board[to];
+            if (!c2) { state.board[to] = c1; state.board[from] = null; state.selIdx = null; } 
+            else if (c1.rank === c2.rank && c1.suit.id === c2.suit.id) {
+                const nxt = RANKS[RANKS.indexOf(c1.rank)+1];
+                if (nxt === 'A') { 
+                    state.board[to] = null; state.aceQueue++; UI.showRoyalSpark(to);
+                    setTimeout(() => Engine.handleAce(), 600); 
+                } else { state.board[to] = {rank: nxt, suit: c1.suit, isNew: true}; }
+                state.board[from] = null; state.selIdx = null;
+                if(tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            } else { state.selIdx = to; }
+            UI.render();
+        },
+        showRoyalSpark: (idx) => {
+            const cell = document.querySelectorAll('#grid .cell')[idx];
+            if(!cell) return;
+            const rect = cell.getBoundingClientRect();
+            const spark = document.createElement('div');
+            spark.className = 'royal-spark'; spark.innerHTML = '💎';
+            spark.style.cssText = `left:${rect.left}px; top:${rect.top}px; width:${rect.width}px; height:${rect.height}px;`;
+            document.body.appendChild(spark); UI.animateBlast();
+            setTimeout(() => spark.remove(), 600);
         },
         renderVault: () => {
             const v = document.getElementById('v-grid'); v.innerHTML = '';
@@ -269,57 +680,124 @@
                 if(c){
                     const card = document.createElement('div'); card.className='card'; card.style.color=c.suit.c;
                     card.innerHTML = `<div class="rank">${c.rank}</div><div class="suit">${c.suit.i}</div>`;
-                    cell.appendChild(card);
-                    cell.onclick = () => { state.selVaultIdx=i; UI.render(); document.getElementById('return-btn').style.display='block'; };
+                    cell.appendChild(card); cell.onclick = () => { state.selVaultIdx=i; UI.render(); document.getElementById('return-btn').style.display='block'; };
                 } else {
                     cell.onclick = () => { if(state.selIdx!==null){ const card=state.board[state.selIdx]; if(['J','Q','K'].includes(card.rank)){ state.vault[i]=card; state.board[state.selIdx]=null; state.selIdx=null; UI.render(); } } };
                 }
                 v.appendChild(cell);
             });
         },
+        renderMap: () => {
+            const container = document.getElementById('map-content');
+            let html = '';
+            for(let i = Math.max(1, state.level - 1); i <= state.level + 4; i++) {
+                const req = Math.floor(i / 2) + 1;
+                const isPast = i < state.level;
+                const isCurrent = i === state.level;
+                const color = isPast ? 'var(--green)' : (isCurrent ? 'var(--gold)' : '#555');
+                const icon = isPast ? '✅' : (isCurrent ? '📍' : '🔒');
+                const rewardTxt = (i % 3 === 0) ? 'نجوم ⭐️ + جوائز' : 'موارد ضخمة 🎁';
+                
+                html += `
+                <div style="background:rgba(255,255,255,0.05); border: 1px solid ${color}; padding: 12px; margin-bottom: 8px; border-radius: 12px; opacity: ${isPast?0.6:1}; display:flex; justify-content:space-between; align-items:center; text-align:right;">
+                    <div>
+                        <div style="color:${color}; font-weight:bold; font-size:16px;">المرحلة ${i} ${icon}</div>
+                        <div style="font-size:11px; color:#aaa; margin-top:4px;">المطلوب: ${req} جواهر 💎 | ${rewardTxt}</div>
+                    </div>
+                    <div style="font-size:24px; filter: grayscale(${isPast||isCurrent?0:100}%) opacity(${isPast||isCurrent?1:0.3})">💎</div>
+                </div>`;
+            }
+            container.innerHTML = html;
+        },
+
         updateStats: () => {
             document.getElementById('gold-txt').innerText = state.gold;
             document.getElementById('energy-val').innerText = state.energy + '/60 ⚡';
             document.getElementById('energy-fill').style.width = (state.energy/60)*100 + '%';
             document.getElementById('j-badge').innerText = state.jokers;
             document.getElementById('b-badge').innerText = state.bombs;
+            document.getElementById('m-badge').innerText = state.magnets; 
             document.getElementById('fc-badge').innerText = state.fastCharges;
-            document.getElementById('v-badge').innerText = state.vault.filter(x=>x).length;
-            document.getElementById('lvl-badge').innerText = Math.floor(state.merges/40)+1;
-            document.getElementById('rank-name').innerText = TITLES[Math.min(8, Math.floor(state.merges/40))];
-            document.getElementById('lvl-fill').style.width = (state.merges%40)*2.5 + '%';
-            document.getElementById('d-count-ui').innerText = `${state.diamond.filter(x=>x).length}/13`;
+            
             document.getElementById('j-inv').classList.toggle('has-stock', state.jokers > 0);
             document.getElementById('bomb-btn').classList.toggle('has-stock', state.bombs > 0);
+            document.getElementById('m-btn').classList.toggle('has-stock', state.magnets > 0);
+            document.getElementById('v-badge').innerText = state.vault.filter(x=>x).length;
+            
+            const reqDiamonds = Math.floor(state.level / 2) + 1;
+            document.getElementById('current-lvl-txt').innerText = `المرحلة ${state.level}`;
+            document.getElementById('d-count-ui').innerText = `القطع: ${state.diamond.filter(x=>x).length}/13`;
+            
+            let diamondIconsHtml = '';
+            for(let i=0; i<reqDiamonds; i++) {
+                diamondIconsHtml += `<span class="d-icon ${i < state.fullDiamonds ? 'active' : ''}">💎</span>`;
+            }
+            document.getElementById('level-diamonds-ui').innerHTML = diamondIconsHtml;
         },
-        animateJokerFly: (cellIdx) => {
-            const rect = document.querySelectorAll('.cell')[cellIdx].getBoundingClientRect();
-            const target = document.getElementById('j-inv').getBoundingClientRect();
-            const flyer = document.createElement('div'); flyer.className = 'anim-fly'; flyer.innerHTML = '🃏';
-            flyer.style.cssText = `left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;background:white;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;`;
-            flyer.style.setProperty('--tx', (target.left - rect.left)+'px'); flyer.style.setProperty('--ty', (target.top - rect.top)+'px');
-            document.body.appendChild(flyer); state.board[cellIdx] = null; UI.render();
-            setTimeout(()=>{ flyer.remove(); state.jokers++; UI.render(); }, 2500);
+
+        openDiamondScreen: () => {
+            document.getElementById('total-d-txt').innerText = state.totalDiamondsCreated || 0;
+            const hBox = document.getElementById('history-box');
+            if (state.history.length === 0) {
+                hBox.innerHTML = '<div style="text-align:center; color:#666; font-size:12px; padding:20px;">السجل فارغ. استمر بالدمج!</div>';
+            } else {
+                hBox.innerHTML = state.history.map(h => {
+                    const diffMins = Math.floor((Date.now() - h.time) / 60000);
+                    let timeTxt = diffMins < 1 ? 'الآن' : (diffMins < 60 ? `منذ ${diffMins} دقيقة` : `منذ ${Math.floor(diffMins/60)} ساعة`);
+                    return `<div class="h-item"><span class="${h.type === 'dup' ? 'h-dup' : 'h-new'}">${h.msg}</span> <span style="color:#666; font-size:10px;">${timeTxt}</span></div>`;
+                }).join('');
+            }
+            UI.toggle('diamond-scr', true);
         },
+
         drawDiamond: () => {
             const svg = document.getElementById('diamond-svg');
-            const p = ["50,5 95,35 50,35", "50,5 50,35 5,35", "5,35 50,35 25,65", "50,35 75,65 25,65", "50,35 95,35 75,65", "25,65 50,95 5,35", "25,65 75,65 50,95", "75,65 95,35 50,95", "50,35 50,65 25,65", "50,35 75,65 50,65", "5,35 25,65 25,35", "95,35 75,65 75,35", "50,5 25,35 75,35"];
+            const p =[
+                "5,40 35,15 25,40", "25,40 35,15 50,40", "35,15 65,15 50,40", "50,40 65,15 75,40", "75,40 65,15 95,40", 
+                "5,40 25,40 37,65 25,65", "25,40 50,40 50,65 37,65", "50,40 75,40 63,65 50,65", "75,40 95,40 75,65 63,65", 
+                "25,65 37,65 50,95", "37,65 50,65 50,95", "50,65 63,65 50,95", "63,65 75,65 50,95"
+            ];
             svg.innerHTML = p.map((d, i) => `<polygon points="${d}" class="tri-p ${state.diamond[i]?'active':''}" id="tri-${i}"/>`).join('');
         },
+
+        animateJokerFlyFrom: (cellIdx) => {
+            const cells = document.querySelectorAll('.cell');
+            if(!cells || !cells[cellIdx]) return;
+            const rect = cells[cellIdx].getBoundingClientRect();
+            const target = document.getElementById('j-inv').getBoundingClientRect();
+            
+            const flyer = document.createElement('div'); 
+            flyer.className = 'anim-fly card'; 
+            flyer.style.cssText = `position:fixed; left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px; z-index:9999; box-shadow:0 3px 6px rgba(0,0,0,0.4); border-radius:5px; background:white; display:flex; align-items:center; justify-content:center; font-size:32px;`;
+            flyer.innerHTML = `🃏`;
+            flyer.style.setProperty('--tx', (target.left - rect.left)+'px'); 
+            flyer.style.setProperty('--ty', (target.top - rect.top)+'px');
+            
+            document.body.appendChild(flyer); 
+            
+            setTimeout(()=>{ 
+                flyer.remove(); state.jokers++; UI.updateStats(); saveGame();
+            }, 2500);
+        },
+
         animateBlast: () => { const l = document.getElementById('blast-layer'); l.classList.add('anim-blast'); setTimeout(()=>l.classList.remove('anim-blast'), 500); },
         toggle: (id, s) => document.getElementById(id).style.display = s?'flex':'none'
     };
 
+    window.onload = loadGame;
+
     setInterval(() => {
         if(state.energy < 60) {
             const d = Date.now() - state.lastRefill;
-            if(d >= 120000){ state.energy++; state.lastRefill = Date.now(); UI.render(); }
-            const r = Math.ceil((120000-d)/1000);
+            if(d >= REFILL_RATE){ state.energy++; state.lastRefill = Date.now(); UI.render(); }
+            const r = Math.ceil((REFILL_RATE-d)/1000);
             document.getElementById('timer-txt').innerText = `شحن: ${Math.floor(r/60)}:${(r%60).toString().padStart(2,'0')}`;
-        } else document.getElementById('timer-txt').innerText = "شحن كامل ✅";
+        } else {
+            document.getElementById('timer-txt').innerText = "شحن كامل ✅";
+            state.lastRefill = Date.now(); 
+        }
     }, 1000);
 
-    UI.drawDiamond(); UI.render();
 </script>
 </body>
 </html>
