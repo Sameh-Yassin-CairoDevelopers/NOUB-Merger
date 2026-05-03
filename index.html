@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Noub Merger V18.1 - Secure Cloud</title>
+    <title>Noub Merger V18.2 - Cloud Fixed</title>
+    <!-- مكتبة تيليجرام ومكتبة Supabase السحابية -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -72,7 +73,7 @@
         .s-buy { background: var(--gold); color: #000; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 0 #b39700; cursor: pointer; transition: 0.1s; min-width: 80px; }
         .s-buy:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
-        /* Loader Overlay for Cloud Sync - آمن جداً ولا يعلق أبداً */
+        /* Loader Overlay for Cloud Sync */
         #cloud-loader { position: fixed; inset: 0; background: #050c10; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gold); font-weight: bold; font-size: 18px; transition: opacity 0.5s; }
 
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
@@ -89,7 +90,6 @@
 </head>
 <body>
 
-    <!-- الشاشة التي كانت تعلق - أصبحت آمنة 100% -->
     <div id="cloud-loader">
         <div style="font-size: 40px; margin-bottom: 10px;">☁️</div>
         جاري مزامنة الخزنة الملكية...
@@ -211,18 +211,18 @@
 
 <script>
     /* =========================================
-       إعدادات قاعدة البيانات (SUPABASE)
+       تهيئة Supabase - تم تغيير المتغير لحل المشكلة
        ========================================= */
-    // ⚠️ تأكد من إبقاء علامات التنصيص (' ') حول الرابط والمفتاح
     const SUPABASE_URL = 'ضع_رابط_سوبابيز_هنا';
     const SUPABASE_ANON_KEY = 'ضع_مفتاح_سوبابيز_هنا';
     
-    let supabase = null;
+    // تم تغيير اسم المتغير إلى dbClient بدلاً من supabase لعدم تعارضه مع مكتبة CDN
+    let dbClient = null;
     try {
         if(SUPABASE_URL !== 'ضع_رابط_سوبابيز_هنا') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
-    } catch(e) { console.error("Supabase init failed", e); }
+    } catch(e) { console.error("Database init failed", e); }
 
     var tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : {};
     if (!tg.showAlert) tg.showAlert = function(msg) { alert(msg); };
@@ -263,7 +263,7 @@
     }
 
     /* 
-     * نظام تحميل اللعبة المحمي كلياً (Fail-Safe Load)
+     * تحميل اللعبة بشكل آمن جداً
      */
     async function loadGame() {
         const loader = document.getElementById('cloud-loader');
@@ -272,31 +272,31 @@
         let loadedState = null;
 
         try {
-            // 1. محاولة القراءة من السحابة
-            if (supabase) {
+            // محاولة القراءة من السحابة إذا كان الرابط مضافاً
+            if (dbClient) {
                 try {
-                    const { data, error } = await supabase
+                    const { data, error } = await dbClient
                         .from('player_saves')
                         .select('game_state')
-                        .eq('telegram_id', String(tgUser.id)) // تم تحويل الـ ID لنص لتفادي أخطاء قواعد البيانات
+                        .eq('telegram_id', String(tgUser.id)) 
                         .single();
                     if (data && data.game_state) loadedState = data.game_state;
-                } catch(e) { console.error("Cloud load failed"); }
+                } catch(e) { console.warn("Cloud read skipped, trying local"); }
             }
 
-            // 2. إذا فشلت السحابة، اقرأ محلياً
+            // إذا فشلت السحابة، اقرأ من الجهاز
             if (!loadedState) {
                 const local = localStorage.getItem(`noub_save_${tgUser.id}`);
                 if (local) {
-                    try { loadedState = JSON.parse(local); } catch(e) { console.error("Local save corrupted"); }
+                    try { loadedState = JSON.parse(local); } catch(e) { }
                 }
             }
 
-            // 3. تطبيق البيانات
+            // تطبيق البيانات
             if (loadedState) {
                 state = { ...state, ...loadedState };
                 
-                // تنظيف الجواكر المعلقة كإجراء وقائي
+                // تنظيف الجواكر المعلقة
                 for(let i=0; i<20; i++){
                     if(state.board[i] && state.board[i].rank === '🃏') {
                         state.board[i] = null; state.jokers++;
@@ -312,32 +312,31 @@
                 }
                 state.isAuto = false; state.selIdx = null; state.isMagnetMode = false;
             } else {
-                // لاعب جديد
                 setTimeout(() => {
                     tg.showAlert(`أهلاً بك يا ${tgUser.first_name}! الملك يهديك 600 ذهب لتبدأ رحلتك.`);
                 }, 1000);
             }
 
         } catch (globalError) {
-            console.error("Critical Loading Error", globalError);
+            console.error("Load Error", globalError);
         } finally {
-            // الإخفاء الإجباري لشاشة التحميل مهما حدث!
+            // الإخفاء الإجباري لشاشة التحميل لضمان فتح اللعبة 100%
             if(loader) {
                 loader.style.opacity = '0';
                 setTimeout(() => loader.style.display = 'none', 500);
             }
             UI.drawDiamond(); 
-            UI.render(); // نرسم الواجهة بعد انتهاء كل شيء فقط
+            UI.render(); 
         }
     }
 
     function saveGame() {
         const stateToSave = JSON.stringify(state);
-        localStorage.setItem(`noub_save_${tgUser.id}`, stateToSave); // حفظ محلي سريع
+        localStorage.setItem(`noub_save_${tgUser.id}`, stateToSave); // حفظ محلي
         
-        if(supabase) {
+        if(dbClient) {
             // رفع للسحابة في الخلفية
-            supabase.from('player_saves').upsert({
+            dbClient.from('player_saves').upsert({
                 telegram_id: String(tgUser.id),
                 player_name: tgUser.first_name,
                 game_state: state
@@ -632,7 +631,7 @@
                 g.appendChild(cell);
             });
             UI.renderVault(); UI.updateStats();
-            saveGame();
+            saveGame(); // يتم استدعاء الحفظ بأمان هنا
         },
         handleClick: (idx) => {
             if(state.selIdx === null) { if(state.board[idx] && state.board[idx].rank!=='🃏') state.selIdx = idx; }
@@ -789,8 +788,8 @@
         toggle: (id, s) => document.getElementById(id).style.display = s?'flex':'none'
     };
 
-    // التنفيذ الفوري الآمن للتحميل
-    loadGame();
+    // التنفيذ الفوري (وآمن 100% حتى لو فشل السيرفر)
+    window.onload = loadGame;
 
     setInterval(() => {
         if(state.energy < 60) {
