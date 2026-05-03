@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Noub Merger V18.0 - Cloud Connected</title>
-    <!-- مكتبة تيليجرام ومكتبة Supabase السحابية -->
+    <title>Noub Merger V18.1 - Secure Cloud</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -12,7 +11,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { margin: 0; background: radial-gradient(circle at top, #163e4d, #050c10); font-family: system-ui, sans-serif; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; color: white; }
 
-        /* Top Holy Bar */
         .holy-bar { padding: calc(env(safe-area-inset-top) + 15px) 20px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
         .icon-group { display: flex; gap: 10px; }
         .icon-btn { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; position: relative; cursor: pointer; transition: 0.2s; }
@@ -26,37 +24,31 @@
         @keyframes pulse-slow { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--diamond); } 50% { transform: scale(1.05); box-shadow: 0 0 15px var(--diamond); } }
         .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; min-width: 16px; height: 16px; border-radius: 8px; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 1px solid #000; padding: 0 3px; }
 
-        /* Level Bar */
         .level-bar { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 320px; margin-bottom: 15px; }
         .level-header { display: flex; justify-content: space-between; font-size: 14px; color: #ddd; margin-bottom: 8px; font-weight: bold; }
         .diamond-icons { font-size: 22px; letter-spacing: 5px; }
         .d-icon { filter: grayscale(100%) opacity(0.3); transition: 0.5s; display: inline-block; }
         .d-icon.active { filter: none; opacity: 1; filter: drop-shadow(0 0 10px var(--diamond)); transform: scale(1.15); }
 
-        /* Grid */
         .game-zone { flex: 1; display: flex; align-items: center; justify-content: center; padding: 0 10px; margin-top: 10px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; max-width: 250px; height: 100%; max-height: 330px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.02); border-radius: 6px; position: relative; border: 2px solid transparent; transition: 0.2s; touch-action: none; }
         .cell.selected { border-color: var(--gold); background: rgba(255,255,255,0.12); transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px var(--gold); }
 
-        /* Cards */
         .card { width: 100%; height: 100%; background: white; border-radius: 5px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.4); pointer-events: none; }
         .card .rank { position: absolute; top: 1px; left: 3px; font-size: 14px; font-weight: 900; color: #1a1a1a; }
         .card .suit { font-size: 30px; }
 
-        /* Control Bar */
         .control-bar { display: flex; justify-content: space-around; padding: 10px; background: rgba(0,0,0,0.4); gap: 8px; }
         .btn-util { width: 44px; height: 44px; border-radius: 10px; background: #1c2e36; border: 1px solid #444; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; }
         .btn-util.has-stock { background: var(--green); border-color: white; box-shadow: 0 0 10px var(--green); }
         .btn-util.active { background: var(--diamond); color: #000; box-shadow: 0 0 15px var(--diamond); }
 
-        /* Footer */
         .footer { padding: 5px 15px 20px; background: #091418; display: flex; gap: 8px; }
         .btn-spawn { flex: 1; height: 55px; border-radius: 15px; border: none; background: linear-gradient(45deg, #ff2e63, #ff6b6b); color: white; font-size: 20px; font-weight: bold; box-shadow: 0 5px 0 #9d153a; transition: 0.1s; }
         .btn-spawn:active { transform: translateY(3px); box-shadow: 0 2px 0 #9d153a; }
         .btn-trash { width: 55px; height: 55px; border-radius: 15px; background: #1c2e36; border: 1px solid #444; color: #aaa; font-size: 22px; display: flex; align-items: center; justify-content: center; }
 
-        /* Modals & History */
         .overlay { position: fixed; inset: 0; background: rgba(5, 12, 16, 0.98); z-index: 5000; display: none; flex-direction: column; align-items: center; padding: 30px 20px; text-align: center; overflow-y: auto; }
         .v-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 220px; margin-top: 15px; }
         .v-cell { aspect-ratio: 1/1.3; background: rgba(255,255,255,0.05); border: 1px dashed #444; border-radius: 6px; position: relative; }
@@ -80,10 +72,9 @@
         .s-buy { background: var(--gold); color: #000; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 0 #b39700; cursor: pointer; transition: 0.1s; min-width: 80px; }
         .s-buy:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
 
-        /* Loader Overlay for Cloud Sync */
+        /* Loader Overlay for Cloud Sync - آمن جداً ولا يعلق أبداً */
         #cloud-loader { position: fixed; inset: 0; background: #050c10; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gold); font-weight: bold; font-size: 18px; transition: opacity 0.5s; }
 
-        /* Animations */
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
         .anim-pop { animation: pop 0.3s ease-out; }
         @keyframes fly-slow { 0% { transform: scale(1); opacity: 1; } 30% { transform: scale(1.2); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; } }
@@ -98,7 +89,7 @@
 </head>
 <body>
 
-    <!-- Cloud Loader -->
+    <!-- الشاشة التي كانت تعلق - أصبحت آمنة 100% -->
     <div id="cloud-loader">
         <div style="font-size: 40px; margin-bottom: 10px;">☁️</div>
         جاري مزامنة الخزنة الملكية...
@@ -132,13 +123,11 @@
         </div>
     </div>
 
-    <!-- Main Game Grid -->
     <div class="game-zone">
         <div id="blast-layer" class="blast"></div>
         <div class="grid" id="grid"></div>
     </div>
 
-    <!-- Control Tools -->
     <div class="control-bar">
         <div class="btn-util" id="fc-btn" onclick="Engine.fastCharge()" style="color:yellow">⚡<div class="badge" id="fc-badge">10</div></div>
         <div class="btn-util" id="m-btn" onclick="Engine.toggleMagnet()" style="font-size:24px">🧲<div class="badge" id="m-badge">2</div></div>
@@ -222,16 +211,15 @@
 
 <script>
     /* =========================================
-       تهيئة Supabase و Telegram Web3 Identity
+       إعدادات قاعدة البيانات (SUPABASE)
        ========================================= */
-    // ⚠️ ضع بيانات الـ Supabase الخاصة بك هنا (URL و ANON_KEY)
-    const SUPABASE_URL = 'https://eqwsfnivhgguzbuzfsca.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxd3Nmbml2aGdndXpidXpmc2NhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NzkyNzYsImV4cCI6MjA5MzM1NTI3Nn0.3-iiWo4DeQACqmQ5SNN0xBiRwKp2E3XsKQqH6aTbbPs';
+    // ⚠️ تأكد من إبقاء علامات التنصيص (' ') حول الرابط والمفتاح
+    const SUPABASE_URL = 'ضع_رابط_سوبابيز_هنا';
+    const SUPABASE_ANON_KEY = 'ضع_مفتاح_سوبابيز_هنا';
     
-    // إنشاء عميل سوبابيز (سيتم تفعيله متى ما وضعت الروابط الحقيقية)
     let supabase = null;
     try {
-        if(SUPABASE_URL !== 'https://eqwsfnivhgguzbuzfsca.supabase.co') {
+        if(SUPABASE_URL !== 'ضع_رابط_سوبابيز_هنا') {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     } catch(e) { console.error("Supabase init failed", e); }
@@ -241,12 +229,12 @@
     if (!tg.HapticFeedback) tg.HapticFeedback = { impactOccurred: function(){}, notificationOccurred: function(){} };
     try { if (tg.expand) tg.expand(); } catch (e) { console.warn("Telegram WebApp Error Ignored:", e); }
 
-    var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : { id: 'test_user_01', first_name: 'لاعب تجريبي' };
+    var tgUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : { id: 123456789, first_name: 'لاعب تجريبي' };
     
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('player-name').innerText = tgUser.first_name;
     });
-    
+
     var RANKS =['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
     var SUITS =[{id:'S',i:'♠️',c:'#222'},{id:'H',i:'♥️',c:'#d32f2f'},{id:'D',i:'♦️',c:'#d32f2f'},{id:'C',i:'♣️',c:'#222'}];
 
@@ -275,65 +263,82 @@
     }
 
     /* 
-     * نظام الحفظ السحابي (Cloud Save Logic)
-     * واجهة المستخدم المتفائلة (Optimistic UI)
+     * نظام تحميل اللعبة المحمي كلياً (Fail-Safe Load)
      */
     async function loadGame() {
-        document.getElementById('cloud-loader').style.display = 'flex';
+        const loader = document.getElementById('cloud-loader');
+        if(loader) loader.style.display = 'flex';
         
         let loadedState = null;
 
-        // 1. محاولة القراءة من Supabase إذا كان مفعلاً
-        if (supabase) {
-            try {
-                const { data, error } = await supabase.from('player_saves').select('game_state').eq('telegram_id', tgUser.id).single();
-                if (data && data.game_state) loadedState = data.game_state;
-            } catch(e) { console.error("Cloud load failed, falling back to local."); }
-        }
+        try {
+            // 1. محاولة القراءة من السحابة
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('player_saves')
+                        .select('game_state')
+                        .eq('telegram_id', String(tgUser.id)) // تم تحويل الـ ID لنص لتفادي أخطاء قواعد البيانات
+                        .single();
+                    if (data && data.game_state) loadedState = data.game_state;
+                } catch(e) { console.error("Cloud load failed"); }
+            }
 
-        // 2. إذا فشل السحابي أو لم يتم إعداده بعد، نقرأ محلياً
-        if (!loadedState) {
-            const local = localStorage.getItem(`noub_save_${tgUser.id}`);
-            if (local) loadedState = JSON.parse(local);
-        }
-
-        // تطبيق البيانات المحملة
-        if (loadedState) {
-            state = { ...state, ...loadedState };
-            
-            // تنظيف الجواكر (حماية)
-            for(let i=0; i<20; i++){
-                if(state.board[i] && state.board[i].rank === '🃏') {
-                    state.board[i] = null; state.jokers++;
+            // 2. إذا فشلت السحابة، اقرأ محلياً
+            if (!loadedState) {
+                const local = localStorage.getItem(`noub_save_${tgUser.id}`);
+                if (local) {
+                    try { loadedState = JSON.parse(local); } catch(e) { console.error("Local save corrupted"); }
                 }
             }
 
-            const now = Date.now();
-            const diffMs = now - state.lastRefill;
-            const earnedEnergy = Math.floor(diffMs / REFILL_RATE);
-            if (earnedEnergy > 0 && state.energy < 60) {
-                state.energy = Math.min(60, state.energy + earnedEnergy);
-                state.lastRefill = now - (diffMs % REFILL_RATE); 
-            }
-            state.isAuto = false; state.selIdx = null; state.isMagnetMode = false;
-        }
+            // 3. تطبيق البيانات
+            if (loadedState) {
+                state = { ...state, ...loadedState };
+                
+                // تنظيف الجواكر المعلقة كإجراء وقائي
+                for(let i=0; i<20; i++){
+                    if(state.board[i] && state.board[i].rank === '🃏') {
+                        state.board[i] = null; state.jokers++;
+                    }
+                }
 
-        document.getElementById('cloud-loader').style.opacity = '0';
-        setTimeout(() => document.getElementById('cloud-loader').style.display = 'none', 500);
-        
-        UI.render();
+                const now = Date.now();
+                const diffMs = now - state.lastRefill;
+                const earnedEnergy = Math.floor(diffMs / REFILL_RATE);
+                if (earnedEnergy > 0 && state.energy < 60) {
+                    state.energy = Math.min(60, state.energy + earnedEnergy);
+                    state.lastRefill = now - (diffMs % REFILL_RATE); 
+                }
+                state.isAuto = false; state.selIdx = null; state.isMagnetMode = false;
+            } else {
+                // لاعب جديد
+                setTimeout(() => {
+                    tg.showAlert(`أهلاً بك يا ${tgUser.first_name}! الملك يهديك 600 ذهب لتبدأ رحلتك.`);
+                }, 1000);
+            }
+
+        } catch (globalError) {
+            console.error("Critical Loading Error", globalError);
+        } finally {
+            // الإخفاء الإجباري لشاشة التحميل مهما حدث!
+            if(loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+            UI.drawDiamond(); 
+            UI.render(); // نرسم الواجهة بعد انتهاء كل شيء فقط
+        }
     }
 
-    // الحفظ المتفائل (يحفظ محلياً فوراً، ويرسل للسحابة بصمت)
     function saveGame() {
         const stateToSave = JSON.stringify(state);
-        // حفظ محلي لسرعة اللعب
-        localStorage.setItem(`noub_save_${tgUser.id}`, stateToSave);
+        localStorage.setItem(`noub_save_${tgUser.id}`, stateToSave); // حفظ محلي سريع
         
-        // رفع للسحابة في الخلفية (Fire and Forget)
         if(supabase) {
+            // رفع للسحابة في الخلفية
             supabase.from('player_saves').upsert({
-                telegram_id: tgUser.id.toString(),
+                telegram_id: String(tgUser.id),
                 player_name: tgUser.first_name,
                 game_state: state
             }).then(({error}) => {
@@ -348,7 +353,7 @@
     }
 
     /* =========================================
-       CORE ENGINE LOGIC (المحرك يظل كما هو تماماً لضمان اللعب)
+       CORE ENGINE LOGIC 
        ========================================= */
     var Engine = {
         spawn: () => {
@@ -784,7 +789,8 @@
         toggle: (id, s) => document.getElementById(id).style.display = s?'flex':'none'
     };
 
-    window.onload = loadGame;
+    // التنفيذ الفوري الآمن للتحميل
+    loadGame();
 
     setInterval(() => {
         if(state.energy < 60) {
